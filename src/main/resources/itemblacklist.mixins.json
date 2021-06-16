@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "github.pitbox46.itemblacklist.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "itemblacklist.refmap.json",
+  "mixins": [
+    "ContainerMixin",
+    "TileEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
