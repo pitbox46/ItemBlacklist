@@ -10,6 +10,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -31,7 +32,6 @@ public class ItemBlacklist {
     private static final Logger LOGGER = LogManager.getLogger();
     public static File BANLIST;
     public static List<Item> BANNED_ITEMS = new ArrayList<>();
-    private static Predicate<ItemStack> deletePredicate = new DefaultPredicate();
 
     public ItemBlacklist() {
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
@@ -75,12 +75,11 @@ public class ItemBlacklist {
         }
     }
 
-    public static void applyOr(Predicate<ItemStack> predicate) {
-        deletePredicate = deletePredicate.or(predicate);
-    }
-
     public static boolean shouldDelete(ItemStack stack) {
-        return deletePredicate.test(stack);
+        BanItemEvent event = new BanItemEvent(stack);
+        MinecraftForge.EVENT_BUS.post(event);
+        if(event.getResult() == Event.Result.DEFAULT) return BANNED_ITEMS.contains(stack.getItem());
+        else return event.getResult() == Event.Result.DENY;
     }
 
     public static String itemListToString(List<Item> itemList) {
