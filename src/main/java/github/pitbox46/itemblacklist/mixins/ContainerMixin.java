@@ -24,7 +24,7 @@ public abstract class ContainerMixin {
     @Inject(at = @At(value = "HEAD"), method = "detectAndSendChanges")
     public void onDetectAndSendChanges(CallbackInfo ci) {
         for(int i = 0; i < this.inventorySlots.size(); ++i) {
-            if(ItemBlacklist.BANNED_ITEMS.contains(this.getInventory().get(i).getItem())) {
+            if(ItemBlacklist.shouldDelete(this.getInventory().get(i))) {
                 this.getInventory().set(i, ItemStack.EMPTY);
             }
         }
@@ -33,12 +33,12 @@ public abstract class ContainerMixin {
     @Inject(at = @At(value = "HEAD"), method = "onContainerClosed")
     public void onContainerClosed(PlayerEntity playerIn, CallbackInfo ci) {
         for(int i = 0; i < this.inventorySlots.size(); ++i) {
-            if(ItemBlacklist.BANNED_ITEMS.contains(this.getInventory().get(i).getItem())) {
+            if(ItemBlacklist.shouldDelete(this.getInventory().get(i))) {
                 this.getInventory().set(i, ItemStack.EMPTY);
             }
         }
         for(int i = 0; i < playerIn.inventory.getSizeInventory(); ++i) {
-            if(ItemBlacklist.BANNED_ITEMS.contains(playerIn.inventory.getStackInSlot(i).getItem())) {
+            if(ItemBlacklist.shouldDelete(playerIn.inventory.getStackInSlot(i))) {
                 playerIn.inventory.setInventorySlotContents(i, ItemStack.EMPTY);
             }
         }

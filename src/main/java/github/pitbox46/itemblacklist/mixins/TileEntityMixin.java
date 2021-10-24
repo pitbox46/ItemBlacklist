@@ -25,7 +25,7 @@ public abstract class TileEntityMixin implements ICapabilityProvider {
         if(world != null) {
             if (this instanceof IInventory) {
                 for (int i = 0; i < ((IInventory) this).getSizeInventory(); i++) {
-                    if (ItemBlacklist.BANNED_ITEMS.contains(((IInventory) this).getStackInSlot(i).getItem())) {
+                    if (ItemBlacklist.shouldDelete(((IInventory) this).getStackInSlot(i))) {
                         ((IInventory) this).setInventorySlotContents(i, ItemStack.EMPTY);
                     }
                 }
@@ -33,7 +33,7 @@ public abstract class TileEntityMixin implements ICapabilityProvider {
                 this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(cap -> {
                     if (cap instanceof IItemHandlerModifiable) {
                         for (int i = 0; i < cap.getSlots(); i++) {
-                            if (ItemBlacklist.BANNED_ITEMS.contains(cap.getStackInSlot(i).getItem())) {
+                            if (ItemBlacklist.shouldDelete(cap.getStackInSlot(i))) {
                                 ((IItemHandlerModifiable) cap).setStackInSlot(i, ItemStack.EMPTY);
                             }
                         }

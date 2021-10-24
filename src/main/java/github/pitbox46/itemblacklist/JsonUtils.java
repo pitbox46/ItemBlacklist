@@ -1,6 +1,7 @@
 package github.pitbox46.itemblacklist;
 
 import com.google.gson.*;
+import net.minecraft.item.AirItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -42,7 +43,10 @@ public class JsonUtils {
             List<Item> returnedArrays = new ArrayList<>();
             assert array != null;
             for(JsonElement element: array) {
-                returnedArrays.add(ForgeRegistries.ITEMS.getValue(new ResourceLocation(element.getAsString())).getItem());
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(element.getAsString())).getItem();
+                if(item != null && !(item instanceof AirItem)) {
+                    returnedArrays.add(item);
+                }
             }
             return returnedArrays;
         } catch (IOException e) {

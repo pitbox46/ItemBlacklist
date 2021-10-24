@@ -24,12 +24,14 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Mod("itemblacklist")
 public class ItemBlacklist {
     private static final Logger LOGGER = LogManager.getLogger();
     public static File BANLIST;
     public static List<Item> BANNED_ITEMS = new ArrayList<>();
+    private static Predicate<ItemStack> deletePredicate = new DefaultPredicate();
 
     public ItemBlacklist() {
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
@@ -51,7 +53,7 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onEntityJoinWorld(EntityJoinWorldEvent event) {
         if(event.getEntity() instanceof ItemEntity) {
-            if(BANNED_ITEMS.contains(((ItemEntity) event.getEntity()).getItem().getItem())) {
+            if(shouldDelete(((ItemEntity) event.getEntity()).getItem())) {
                 event.setCanceled(true);
             }
         }
@@ -59,7 +61,7 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onItemPickup(PlayerEvent.ItemPickupEvent event) {
-        if(BANNED_ITEMS.contains(event.getStack().getItem())) {
+        if(shouldDelete(event.getStack())) {
             event.setCanceled(true);
         }
     }
@@ -67,10 +69,18 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
         for(int i = 0; i < event.getContainer().inventorySlots.size(); ++i) {
-            if(ItemBlacklist.BANNED_ITEMS.contains(event.getContainer().getInventory().get(i).getItem())) {
+            if(shouldDelete(event.getContainer().getInventory().get(i))) {
                 event.getContainer().getInventory().set(i, ItemStack.EMPTY);
             }
         }
+    }
+
+    public static void applyOr(Predicate<ItemStack> predicate) {
+        deletePredicate = deletePredicate.or(predicate);
+    }
+
+    public static boolean shouldDelete(ItemStack stack) {
+        return deletePredicate.test(stack);
     }
 
     public static String itemListToString(List<Item> itemList) {
