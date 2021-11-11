@@ -40,8 +40,8 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
-        Path modFolder = event.getServer().func_240776_a_(new FolderName("itemblacklist"));
-        BANLIST = JsonUtils.initialize(modFolder, "itemblacklist", "banlist.json");
+        Path modFolder = event.getServer().func_240776_a_(new FolderName("serverconfig"));
+        BANLIST = JsonUtils.initialize(modFolder, "serverconfig", "itemblacklist.json");
         BANNED_ITEMS = JsonUtils.readItemsFromJson(BANLIST);
     }
 

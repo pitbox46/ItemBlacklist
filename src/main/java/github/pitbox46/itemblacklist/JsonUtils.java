@@ -5,13 +5,17 @@ import net.minecraft.item.AirItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.loading.FMLConfig;
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +27,14 @@ public class JsonUtils {
         File file = new File(FileUtils.getOrCreateDirectory(folder, folderName).toFile(), fileName);
         try {
             if(file.createNewFile()) {
-                FileWriter configWriter = new FileWriter(file);
-                configWriter.write(gson.toJson(new JsonArray()));
-                configWriter.close();
+                Path defaultConfigPath = FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath()).resolve("itemblacklist.json");
+                if (Files.exists(defaultConfigPath)) {
+                    Files.copy(defaultConfigPath, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    FileWriter configWriter = new FileWriter(file);
+                    configWriter.write(gson.toJson(new JsonArray()));
+                    configWriter.close();
+                }
             }
         } catch(IOException e) {
             LOGGER.warn(e.getMessage());
