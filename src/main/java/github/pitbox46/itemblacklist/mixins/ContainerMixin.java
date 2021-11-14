@@ -13,8 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-
 @Mixin(AbstractContainerMenu.class)
 public abstract class ContainerMixin {
     @Shadow @Final public NonNullList<Slot> slots;
