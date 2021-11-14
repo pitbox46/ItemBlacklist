@@ -2,6 +2,7 @@ package github.pitbox46.itemblacklist.mixins;
 
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -36,7 +37,7 @@ public abstract class ContainerMixin {
             }
         }
         for(int i = 0; i < playerIn.getInventory().getContainerSize(); ++i) {
-            if(ItemBlacklist.shouldDelete(playerIn.getInventory().getItem(i))) {
+            if(playerIn instanceof ServerPlayer && !playerIn.hasPermissions(playerIn.getServer().getOperatorUserPermissionLevel()) && ItemBlacklist.shouldDelete(playerIn.getInventory().getItem(i))) {
                 playerIn.getInventory().setItem(i, ItemStack.EMPTY);
             }
         }
