@@ -6,23 +6,23 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import github.pitbox46.itemblacklist.ItemBlacklist;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TextComponent;
 
-public class CommandBanList implements Command<CommandSource> {
+public class CommandBanList implements Command<CommandSourceStack> {
     private static final CommandBanList CMD = new CommandBanList();
 
-    public static ArgumentBuilder<CommandSource, ?> register(CommandDispatcher<CommandSource> dispatcher) {
+    public static ArgumentBuilder<CommandSourceStack, ?> register(CommandDispatcher<CommandSourceStack> dispatcher) {
         return Commands
                 .literal("list")
                 .executes(CMD);
     }
 
     @Override
-    public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        context.getSource().asPlayer().sendStatusMessage(new StringTextComponent("Items banned: ").appendString(ItemBlacklist.itemListToString(ItemBlacklist.BANNED_ITEMS)), false);
+    public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        context.getSource().getPlayerOrException().displayClientMessage(new TextComponent("Items banned: ").append(ItemBlacklist.itemListToString(ItemBlacklist.BANNED_ITEMS)), false);
         return 0;
     }
 }

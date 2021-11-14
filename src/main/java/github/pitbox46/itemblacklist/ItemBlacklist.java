@@ -1,10 +1,10 @@
 package github.pitbox46.itemblacklist;
 
 import github.pitbox46.itemblacklist.commands.ModCommands;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -12,11 +12,11 @@ import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
+import net.minecraftforge.fmllegacy.network.FMLNetworkConstants;
+import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,13 +34,13 @@ public class ItemBlacklist {
     public static List<Item> BANNED_ITEMS = new ArrayList<>();
 
     public ItemBlacklist() {
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
-        Path modFolder = event.getServer().func_240776_a_(new FolderName("serverconfig"));
+        Path modFolder = event.getServer().getWorldPath(new LevelResource("serverconfig"));
         BANLIST = JsonUtils.initialize(modFolder, "serverconfig", "itemblacklist.json");
         BANNED_ITEMS = JsonUtils.readItemsFromJson(BANLIST);
     }
@@ -68,9 +68,9 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
-        for(int i = 0; i < event.getContainer().inventorySlots.size(); ++i) {
-            if(shouldDelete(event.getContainer().getInventory().get(i))) {
-                event.getContainer().getInventory().set(i, ItemStack.EMPTY);
+        for(int i = 0; i < event.getContainer().slots.size(); ++i) {
+            if(shouldDelete(event.getContainer().getItems().get(i))) {
+                event.getContainer().getItems().set(i, ItemStack.EMPTY);
             }
         }
     }

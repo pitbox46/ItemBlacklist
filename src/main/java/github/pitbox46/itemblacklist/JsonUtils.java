@@ -1,10 +1,10 @@
 package github.pitbox46.itemblacklist;
 
 import com.google.gson.*;
-import net.minecraft.item.AirItem;
-import net.minecraft.item.Item;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.AirItem;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
@@ -48,11 +48,11 @@ public class JsonUtils {
     public static List<Item> readItemsFromJson(File jsonFile) {
         try {
             Reader reader = new FileReader(jsonFile);
-            JsonArray array = JSONUtils.fromJson(gson, reader, JsonArray.class);
+            JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
             List<Item> returnedArrays = new ArrayList<>();
             assert array != null;
             for(JsonElement element: array) {
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(element.getAsString())).getItem();
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(element.getAsString())).asItem();
                 if(item != null && !(item instanceof AirItem)) {
                     returnedArrays.add(item);
                 }
@@ -69,7 +69,7 @@ public class JsonUtils {
      */
     public static void appendItemToJson(File jsonFile, Item item) {
         try (Reader reader = new FileReader(jsonFile)) {
-            JsonArray array = JSONUtils.fromJson(gson, reader, JsonArray.class);
+            JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
             assert array != null;
 
             JsonPrimitive string = new JsonPrimitive(item.getRegistryName().toString());
@@ -90,7 +90,7 @@ public class JsonUtils {
      */
     public static void removeItemFromJson(File jsonFile, Item item) throws IndexOutOfBoundsException {
         try (Reader reader = new FileReader(jsonFile)) {
-            JsonArray array = JSONUtils.fromJson(gson, reader, JsonArray.class);
+            JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
             assert array != null;
             int itemLocation = -1;
             int i = 0;
