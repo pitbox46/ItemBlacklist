@@ -35,7 +35,7 @@ public class ModCommands {
 
         JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, player.getItemInHand(hand).getItem());
         player.sendMessage(new TextComponent("Item banned: ").append(stack.getItem().getRegistryName().toString()), ChatType.CHAT, Util.NIL_UUID);
-        player.getItemInHand(hand).setCount(stackcount);
+        player.getItemInHand(hand).setCount(-stackcount);
 
         return 0;
     }
