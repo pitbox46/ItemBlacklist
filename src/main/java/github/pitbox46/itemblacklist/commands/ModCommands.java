@@ -2,8 +2,16 @@ package github.pitbox46.itemblacklist.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import github.pitbox46.itemblacklist.ItemBlacklist;
+import github.pitbox46.itemblacklist.JsonUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.StringTextComponent;
+
+import java.util.Objects;
+import java.util.UUID;
 
 public class ModCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
@@ -13,21 +21,21 @@ public class ModCommands {
                         .then(CommandUnbanItem.register(dispatcher))
                         .then(CommandBanList.register(dispatcher))
                         .then(Commands.literal("hand")
-                                .executes(context -> hand(context.getSource().getPlayerOrException(), InteractionHand.MAIN_HAND))
+                                .executes(context -> hand(context.getSource().asPlayer()))
                         )
         );
 
         dispatcher.register(Commands.literal("itemblacklist").redirect(cmdTut));
     }
 
-    private static int hand(ServerPlayer player, InteractionHand hand) {
-        var stack = player.getItemInHand(hand);
-        var stackcount = stack.getCount();
+    private static int hand(ServerPlayerEntity player) {
+        ItemStack stack = player.getHeldItemMainhand();
+        int stackcount = stack.getCount();
 
-        JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, player.getItemInHand(hand).getItem());
-        player.sendMessage(new TextComponent("Item banned: ").append(stack.getItem().getRegistryName().toString()), ChatType.CHAT, Util.NIL_UUID);
-        // Below Line Removes the item from hand when blacklisting is succesful - kept out for those who wouldn't care for it unless a config option was a thing.
-        //player.getItemInHand(hand).setCount(stackcount);
+        JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, stack.getItem());
+        player.sendMessage(new StringTextComponent("Item banned: ").appendString(Objects.requireNonNull(stack.getItem().getRegistryName()).toString()), UUID.randomUUID());
+
+        stack.setCount(-stackcount);
 
         return 0;
     }
