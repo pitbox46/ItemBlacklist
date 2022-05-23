@@ -25,7 +25,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 @Mod("itemblacklist")
 public class ItemBlacklist {
