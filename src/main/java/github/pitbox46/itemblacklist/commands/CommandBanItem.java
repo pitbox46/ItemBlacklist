@@ -13,7 +13,6 @@ import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 public class CommandBanItem implements Command<CommandSource> {
     private static final CommandBanItem CMD = new CommandBanItem();

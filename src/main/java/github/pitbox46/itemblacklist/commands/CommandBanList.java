@@ -9,7 +9,6 @@ import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 public class CommandBanList implements Command<CommandSource> {
     private static final CommandBanList CMD = new CommandBanList();
