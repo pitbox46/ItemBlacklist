@@ -21,8 +21,7 @@ public class CommandBanItem implements Command<CommandSourceStack> {
         return Commands
                 .literal("ban")
                 .requires(cs -> cs.hasPermission(2))
-                .then(Commands.argument("item", ItemArgument.item())
-                        .executes(CMD));
+                .then(Commands.argument("item", ItemArgument.item()).executes(CMD));
     }
 
     @Override
