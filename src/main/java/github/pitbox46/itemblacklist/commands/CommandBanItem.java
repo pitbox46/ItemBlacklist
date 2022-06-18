@@ -7,27 +7,45 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import github.pitbox46.itemblacklist.JsonUtils;
-import net.minecraft.Util;
+import github.pitbox46.itemblacklist.Utils;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class CommandBanItem implements Command<CommandSourceStack> {
     private static final CommandBanItem CMD = new CommandBanItem();
 
-    public static ArgumentBuilder<CommandSourceStack, ?> register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static ArgumentBuilder<CommandSourceStack, ?> register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
         return Commands
                 .literal("ban")
                 .requires(cs -> cs.hasPermission(2))
-                .then(Commands.argument("item", ItemArgument.item()).executes(CMD));
+                .then(Commands.argument("item", ItemArgument.item(context)).executes(CMD))
+                .then(Commands.literal("hand").executes(ctx -> {
+                    ItemStack stack = ctx.getSource().getPlayerOrException().getMainHandItem();
+                    int i = banItem(ctx, ctx.getSource().getPlayerOrException().getMainHandItem().getItem());
+                    stack.setCount(0);
+                    return i;
+                }));
     }
 
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, ItemArgument.getItem(context, "item").getItem());
-        context.getSource().getServer().getPlayerList().broadcastMessage(new TextComponent("Item banned: ").append(ItemArgument.getItem(context, "item").getItem().getRegistryName().toString()), ChatType.CHAT, Util.NIL_UUID);
+        return banItem(context, ItemArgument.getItem(context, "item").getItem());
+    }
+
+    private static int banItem(CommandContext<CommandSourceStack> context, Item item) {
+        if(item == Items.AIR)
+            return 1;
+        JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, item);
+        Utils.broadcastMessage(context.getSource().getServer(),
+                Component.literal("Item banned: ")
+                        .append(ForgeRegistries.ITEMS.getKey(item).toString()));
         return 0;
     }
 }

@@ -17,6 +17,7 @@ import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +46,7 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onRegisterCommands(RegisterCommandsEvent event) {
-        ModCommands.register(event.getDispatcher());
+        ModCommands.register(event.getDispatcher(), event.getBuildContext());
     }
 
     @SubscribeEvent
@@ -84,7 +85,7 @@ public class ItemBlacklist {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for(Item item: itemList) {
-            builder.append(item.getRegistryName().toString()).append(", ");
+            builder.append(ForgeRegistries.ITEMS.getKey(item).toString()).append(", ");
         }
         if(itemList.size() > 0) builder.delete(builder.length() - 2, builder.length());
         builder.append(']');

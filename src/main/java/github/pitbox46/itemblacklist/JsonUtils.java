@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.AirItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.FileUtils;
@@ -72,7 +73,7 @@ public class JsonUtils {
             JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
             assert array != null;
 
-            JsonPrimitive string = new JsonPrimitive(item.getRegistryName().toString());
+            JsonPrimitive string = new JsonPrimitive(ForgeRegistries.ITEMS.getKey(item).toString());
             if(!array.contains(string))
                 array.add(string);
 
@@ -95,7 +96,7 @@ public class JsonUtils {
             int itemLocation = -1;
             int i = 0;
             for(JsonElement element: array) {
-                if(element.getAsString().equals(item.getRegistryName().toString())) itemLocation = i;
+                if(element.getAsString().equals(ForgeRegistries.ITEMS.getKey(item).toString())) itemLocation = i;
                 i++;
             }
             array.remove(itemLocation);
