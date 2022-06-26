@@ -6,6 +6,7 @@
   "refmap": "itemblacklist.refmap.json",
   "mixins": [
     "ContainerMixin",
+    "RecipeManagerMixin",
     "TileEntityMixin"
   ],
   "injectors": {

@@ -66,7 +66,7 @@ public class ItemBlacklist {
     }
 
     @SubscribeEvent
-    public void onPlayerContainerOpen(PlayerContainerEvent event) {
+    public void onPlayerContainerEvent(PlayerContainerEvent event) {
         for(int i = 0; i < event.getContainer().inventorySlots.size(); ++i) {
             if(shouldDelete(event.getContainer().getInventory().get(i))) {
                 event.getContainer().getInventory().set(i, ItemStack.EMPTY);
