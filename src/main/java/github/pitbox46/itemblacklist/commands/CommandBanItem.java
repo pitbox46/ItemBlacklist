@@ -13,6 +13,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -43,9 +45,16 @@ public class CommandBanItem implements Command<CommandSourceStack> {
         if(item == Items.AIR)
             return 1;
         JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, item);
+        PlayerList playerList = context.getSource().getServer().getPlayerList();
         Utils.broadcastMessage(context.getSource().getServer(),
                 Component.literal("Item banned: ")
                         .append(ForgeRegistries.ITEMS.getKey(item).toString()));
+        for(ServerPlayer player : playerList.getPlayers()) {
+            for(int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                if(ItemBlacklist.shouldDelete(player.getInventory().getItem(i)))
+                    player.getInventory().getItem(i).setCount(0);
+            }
+        }
         return 0;
     }
 }
