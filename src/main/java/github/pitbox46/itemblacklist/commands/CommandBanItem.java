@@ -13,6 +13,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 
 public class CommandBanItem implements Command<CommandSourceStack> {
     private static final CommandBanItem CMD = new CommandBanItem();
@@ -28,7 +30,14 @@ public class CommandBanItem implements Command<CommandSourceStack> {
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, ItemArgument.getItem(context, "item").getItem());
-        context.getSource().getServer().getPlayerList().broadcastMessage(new TextComponent("Item banned: ").append(ItemArgument.getItem(context, "item").getItem().getRegistryName().toString()), ChatType.CHAT, Util.NIL_UUID);
+        PlayerList playerList = context.getSource().getServer().getPlayerList();
+        playerList.broadcastMessage(new TextComponent("Item banned: ").append(ItemArgument.getItem(context, "item").getItem().getRegistryName().toString()), ChatType.CHAT, Util.NIL_UUID);
+        for(ServerPlayer player : playerList.getPlayers()) {
+            for(int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                if(ItemBlacklist.shouldDelete(player.getInventory().getItem(i)))
+                    player.getInventory().getItem(i).setCount(0);
+            }
+        }
         return 0;
     }
 }
