@@ -8,16 +8,12 @@ import github.pitbox46.itemblacklist.ItemBlacklist;
 import github.pitbox46.itemblacklist.JsonUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.ItemArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.StringTextComponent;
-
-import java.util.Objects;
-import java.util.UUID;
 
 public class ModCommands {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
