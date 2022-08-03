@@ -8,7 +8,7 @@ version = "${file.jarVersion}"
 displayName = "Item Blacklist"
 authors = "pitbox46"
 description ="Allows Blacklisting Items on Servers"
-credits='''Thank you X_Niter for the 1.18.2 Capability update.'''
+credits='''Thank you X_Niter for multiple contributions to this mod'''
 
 
 [[dependencies.itemblacklist]]
