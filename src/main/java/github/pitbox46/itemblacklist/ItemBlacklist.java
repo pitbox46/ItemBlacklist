@@ -16,6 +16,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,7 +76,7 @@ public class ItemBlacklist {
 
     public static boolean shouldDelete(ItemStack stack) {
         BanItemEvent event = new BanItemEvent(stack);
-        MinecraftForge.EVENT_BUS.post(event);
+        FMLJavaModLoadingContext.get().getModEventBus().post(event);
         if(event.getResult() == Event.Result.DEFAULT) return BANNED_ITEMS.contains(stack.getItem());
         else return event.getResult() == Event.Result.DENY;
     }
