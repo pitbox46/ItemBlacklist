@@ -76,7 +76,7 @@ public class ItemBlacklist {
 
     public static boolean shouldDelete(ItemStack stack) {
         BanItemEvent event = new BanItemEvent(stack);
-        FMLJavaModLoadingContext.get().getModEventBus().post(event);
+        MinecraftForge.EVENT_BUS.post(event); //Has to fire on forge's event bus since our event bus isn't created in time
         if(event.getResult() == Event.Result.DEFAULT) return BANNED_ITEMS.contains(stack.getItem());
         else return event.getResult() == Event.Result.DENY;
     }
