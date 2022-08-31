@@ -23,6 +23,7 @@ public class ModCommands {
                         .then(CommandUnbanItem.register(dispatcher))
                         .then(CommandBanList.register(dispatcher))
                         .then(Commands.literal("hand")
+                                .requires(cs -> cs.hasPermissionLevel(2))
                                 .executes(ModCommands::hand)
                         )
         );
