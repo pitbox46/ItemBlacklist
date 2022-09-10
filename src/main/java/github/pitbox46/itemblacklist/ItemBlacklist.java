@@ -39,9 +39,20 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
+        // Global banlist
+        Path packFolder = event.getServer(new LevelResource("config"));
+        BANLIST = JsonUtils.initialize(packFolder, "config", "itembanning_blacklist.json");
+        new ArrayList globalBans = JsonUtils.readItemsFromJson(BANLIST);
+        
+        // Per-world banlist
         Path modFolder = event.getServer().getWorldPath(new LevelResource("serverconfig"));
         BANLIST = JsonUtils.initialize(modFolder, "serverconfig", "itemblacklist.json");
-        BANNED_ITEMS = JsonUtils.readItemsFromJson(BANLIST);
+        new ArrayList localBans = JsonUtils.readItemsFromJson(BANLIST);
+
+        // Ensure that there are no duplicates in banlist.
+        Set<String> allBans = new LinkedHashSet<>(globalBans);
+        allBans.addAll(localBans);
+        BANLIST = new ArrayList<>(allBans);
     }
 
     @SubscribeEvent
