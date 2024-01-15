@@ -8,7 +8,7 @@
     "ContainerMixin",
     "MerchantMenuMixin",
     "RecipeManagerMixin",
-    "TileEntityMixin"
+    "BlockEntityMixin"
   ],
   "client": [
   ],

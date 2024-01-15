@@ -1,23 +1,22 @@
 package github.pitbox46.itemblacklist;
 
 import github.pitbox46.itemblacklist.commands.ModCommands;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkConstants;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.IExtensionPoint;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,8 +32,8 @@ public class ItemBlacklist {
     public static List<Item> BANNED_ITEMS = new ArrayList<>();
 
     public ItemBlacklist() {
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-        MinecraftForge.EVENT_BUS.register(this);
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> IExtensionPoint.DisplayTest.IGNORESERVERONLY, (a, b) -> true));
+        NeoForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
@@ -61,33 +60,39 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onItemPickup(PlayerEvent.ItemPickupEvent event) {
         if(shouldDelete(event.getStack())) {
-            event.setCanceled(true);
+            event.getStack().setCount(0);
         }
     }
 
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
         for(int i = 0; i < event.getContainer().slots.size(); ++i) {
-            if(shouldDelete(event.getContainer().getItems().get(i))) {
-                event.getContainer().getItems().set(i, ItemStack.EMPTY);
+            if(shouldDelete(event.getContainer().getSlot(i).getItem())) {
+                event.getContainer().getSlot(i).set(ItemStack.EMPTY);
             }
         }
     }
 
     public static boolean shouldDelete(ItemStack stack) {
         BanItemEvent event = new BanItemEvent(stack);
-        MinecraftForge.EVENT_BUS.post(event);
-        if(event.getResult() == Event.Result.DEFAULT) return BANNED_ITEMS.contains(stack.getItem());
-        else return event.getResult() == Event.Result.DENY;
+        NeoForge.EVENT_BUS.post(event);
+        if(event.deleteItem) {
+            return true;
+        }
+        else {
+            return BANNED_ITEMS.contains(stack.getItem());
+        }
     }
 
     public static String itemListToString(List<Item> itemList) {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for(Item item: itemList) {
-            builder.append(ForgeRegistries.ITEMS.getKey(item).toString()).append(", ");
+            builder.append(BuiltInRegistries.ITEM.getKey(item)).append(", ");
         }
-        if(itemList.size() > 0) builder.delete(builder.length() - 2, builder.length());
+        if(!itemList.isEmpty()) {
+            builder.delete(builder.length() - 2, builder.length());
+        }
         builder.append(']');
         return builder.toString();
     }
