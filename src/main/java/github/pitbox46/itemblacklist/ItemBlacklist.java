@@ -6,14 +6,14 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.IExtensionPoint;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -31,8 +31,7 @@ public class ItemBlacklist {
     public static File BANLIST;
     public static List<Item> BANNED_ITEMS = new ArrayList<>();
 
-    public ItemBlacklist() {
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> IExtensionPoint.DisplayTest.IGNORESERVERONLY, (a, b) -> true));
+    public ItemBlacklist(ModContainer container) {
         NeoForge.EVENT_BUS.register(this);
     }
 
@@ -58,9 +57,10 @@ public class ItemBlacklist {
     }
 
     @SubscribeEvent
-    public void onItemPickup(PlayerEvent.ItemPickupEvent event) {
-        if(shouldDelete(event.getStack())) {
-            event.getStack().setCount(0);
+    public void onItemPickup(ItemEntityPickupEvent.Pre event) {
+        if(shouldDelete(event.getItemEntity().getItem())) {
+            event.getItemEntity().kill();
+            event.setCanPickup(TriState.FALSE);
         }
     }
 
