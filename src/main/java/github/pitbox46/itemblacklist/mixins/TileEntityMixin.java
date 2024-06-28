@@ -5,8 +5,8 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,7 +30,7 @@ public abstract class TileEntityMixin implements ICapabilityProvider {
                     }
                 }
             } else {
-                this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(cap -> {
+                this.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(cap -> {
                     if (cap instanceof IItemHandlerModifiable) {
                         for (int i = 0; i < cap.getSlots(); i++) {
                             if (ItemBlacklist.shouldDelete(cap.getStackInSlot(i))) {

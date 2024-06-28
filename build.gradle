@@ -14,14 +14,14 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin' // mixin
 
 group = 'github.pitbox46'
-version = '1.19.0-1.1.2'
+version = '1.20.1-1.0.0f'
 archivesBaseName = 'itemblacklist'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.19'
+    mappings channel: 'official', version: '1.20'
 
     runs {
         client {

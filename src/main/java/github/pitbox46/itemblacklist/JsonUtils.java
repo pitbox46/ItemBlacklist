@@ -25,7 +25,7 @@ public class JsonUtils {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static File initialize(Path folder, String folderName, String fileName) {
-        File file = new File(FileUtils.getOrCreateDirectory(folder, folderName).toFile(), fileName);
+        File file = new File(getOrCreateDirectory(folder.resolve(folderName)).toFile(), fileName);
         try {
             if(file.createNewFile()) {
                 Path defaultConfigPath = FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath()).resolve("itemblacklist.json");
@@ -41,6 +41,19 @@ public class JsonUtils {
             LOGGER.warn(e.getMessage());
         }
         return file;
+    }
+
+    public static Path getOrCreateDirectory(Path path) {
+        try {
+            if (Files.exists(path)) {
+                return path;
+            } else {
+                return Files.createDirectory(path);
+            }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

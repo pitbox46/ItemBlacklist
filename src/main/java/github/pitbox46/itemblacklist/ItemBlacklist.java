@@ -68,8 +68,8 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
         for(int i = 0; i < event.getContainer().slots.size(); ++i) {
-            if(shouldDelete(event.getContainer().getItems().get(i))) {
-                event.getContainer().getItems().set(i, ItemStack.EMPTY);
+            if(shouldDelete(event.getContainer().getSlot(i).getItem())) {
+                event.getContainer().getSlot(i).set(ItemStack.EMPTY);
             }
         }
     }
