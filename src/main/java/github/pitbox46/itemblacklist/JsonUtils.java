@@ -16,7 +16,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class JsonUtils {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -57,11 +59,11 @@ public class JsonUtils {
     /**
      * Reads items from a Json that has a top level array
      */
-    public static List<Item> readItemsFromJson(File jsonFile) {
+    public static Set<Item> readItemsFromJson(File jsonFile) {
         try {
             Reader reader = new FileReader(jsonFile);
             JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
-            List<Item> returnedArrays = new ArrayList<>();
+            Set<Item> returnedArrays = new HashSet<>();
             for(JsonElement element: array) {
                 Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(element.getAsString()));
                 if(!(item instanceof AirItem)) {

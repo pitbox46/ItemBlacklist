@@ -24,13 +24,15 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mod("itemblacklist")
 public class ItemBlacklist {
     private static final Logger LOGGER = LogManager.getLogger();
     public static File BANLIST;
-    public static List<Item> BANNED_ITEMS = new ArrayList<>();
+    public static Set<Item> BANNED_ITEMS = new HashSet<>();
 
     public ItemBlacklist(ModContainer container) {
         NeoForge.EVENT_BUS.register(this);
@@ -85,7 +87,7 @@ public class ItemBlacklist {
         }
     }
 
-    public static String itemListToString(List<Item> itemList) {
+    public static String itemListToString(Set<Item> itemList) {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for(Item item: itemList) {
