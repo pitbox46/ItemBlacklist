@@ -2,6 +2,7 @@ package github.pitbox46.itemblacklist;
 
 import github.pitbox46.itemblacklist.commands.ModCommands;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -59,7 +60,7 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onItemPickup(ItemEntityPickupEvent.Pre event) {
         if(shouldDelete(event.getItemEntity().getItem())) {
-            event.getItemEntity().kill();
+            event.getItemEntity().remove(Entity.RemovalReason.KILLED);
             event.setCanPickup(TriState.FALSE);
         }
     }

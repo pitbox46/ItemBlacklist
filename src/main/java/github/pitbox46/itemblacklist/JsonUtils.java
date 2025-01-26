@@ -63,7 +63,7 @@ public class JsonUtils {
             JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
             List<Item> returnedArrays = new ArrayList<>();
             for(JsonElement element: array) {
-                Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(element.getAsString()));
+                Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(element.getAsString()));
                 if(!(item instanceof AirItem)) {
                     returnedArrays.add(item);
                 }
