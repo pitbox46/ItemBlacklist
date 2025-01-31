@@ -23,14 +23,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Mod("itemblacklist")
 public class ItemBlacklist {
     private static final Logger LOGGER = LogManager.getLogger();
     public static File BANLIST;
-    public static List<Item> BANNED_ITEMS = new ArrayList<>();
+    public static Set<Item> BANNED_ITEMS = new HashSet<>();
 
     public ItemBlacklist() {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
@@ -81,13 +80,13 @@ public class ItemBlacklist {
         else return event.getResult() == Event.Result.DENY;
     }
 
-    public static String itemListToString(List<Item> itemList) {
+    public static String itemListToString(Collection<Item> itemList) {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for(Item item: itemList) {
             builder.append(ForgeRegistries.ITEMS.getKey(item).toString()).append(", ");
         }
-        if(itemList.size() > 0) builder.delete(builder.length() - 2, builder.length());
+        if(!itemList.isEmpty()) builder.delete(builder.length() - 2, builder.length());
         builder.append(']');
         return builder.toString();
     }
