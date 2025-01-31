@@ -50,8 +50,8 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onEntityJoinWorld(EntityJoinLevelEvent event) {
-        if(event.getEntity() instanceof ItemEntity) {
-            if(shouldDelete(((ItemEntity) event.getEntity()).getItem())) {
+        if(event.getEntity() instanceof ItemEntity itemEntity) {
+            if(shouldDelete(itemEntity.getItem())) {
                 event.setCanceled(true);
             }
         }
