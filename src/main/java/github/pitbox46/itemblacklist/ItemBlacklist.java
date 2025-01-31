@@ -1,6 +1,7 @@
 package github.pitbox46.itemblacklist;
 
 import github.pitbox46.itemblacklist.commands.ModCommands;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -8,8 +9,8 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -58,9 +59,10 @@ public class ItemBlacklist {
     }
 
     @SubscribeEvent
-    public void onItemPickup(PlayerEvent.ItemPickupEvent event) {
-        if(shouldDelete(event.getStack())) {
+    public void onItemPickup(EntityItemPickupEvent event) {
+        if(shouldDelete(event.getItem().getItem())) {
             event.setCanceled(true);
+            event.getItem().remove(Entity.RemovalReason.KILLED);
         }
     }
 
