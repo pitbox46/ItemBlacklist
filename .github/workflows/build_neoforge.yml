@@ -26,11 +26,11 @@ jobs:
 
       - name: Grant Execute Permission for Gradle
         run: |
-          chmod +x neoforge/gradlew
+          chmod +x gradlew
 
       - name: Build with Gradle
         run: |
-          (cd neoforge && ./gradlew build)
+          (gradlew build)
 
       - name: mc-publish neoforge
         uses: Kira-NT/mc-publish@v3.3.0
@@ -42,7 +42,7 @@ jobs:
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
           files: |
-            neoforge/build/libs/!(*-@(dev|sources|javadoc)).jar
-            neoforge/build/libs/*-@(dev|sources|javadoc).jar
+            build/libs/!(*-@(dev|sources|javadoc)).jar
+            build/libs/*-@(dev|sources|javadoc).jar
 
           changelog-file: CHANGELOG.*
