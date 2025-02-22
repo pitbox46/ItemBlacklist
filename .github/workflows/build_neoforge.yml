@@ -1,0 +1,48 @@
+name: Build Neoforge
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: minecraft
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1000
+          fetch-tags: true
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+
+      - name: Grant Execute Permission for Gradle
+        run: |
+          chmod +x neoforge/gradlew
+
+      - name: Build with Gradle
+        run: |
+          (cd neoforge && ./gradlew build)
+
+      - name: mc-publish neoforge
+        uses: Kira-NT/mc-publish@v3.3.0
+        with:
+          modrinth-id: wjn6tPiY
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          curseforge-id: 494654
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: |
+            neoforge/build/libs/!(*-@(dev|sources|javadoc)).jar
+            neoforge/build/libs/*-@(dev|sources|javadoc).jar
+
+          changelog-file: CHANGELOG.*
