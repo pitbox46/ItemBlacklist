@@ -1,9 +1,11 @@
 package github.pitbox46.itemblacklist;
 
+import github.pitbox46.itemblacklist.blacklist.Blacklist;
 import github.pitbox46.itemblacklist.commands.ModCommands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
@@ -16,23 +18,20 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Mod("itemblacklist")
 public class ItemBlacklist {
-    private static final Logger LOGGER = LogManager.getLogger();
-    public static File BANLIST;
-    public static Set<Item> BANNED_ITEMS = new HashSet<>();
+    public static final Logger LOGGER = LogManager.getLogger();
+    public static File BLACKLIST_FILE = null;
+    public static Blacklist BLACKLIST = null;
 
     public ItemBlacklist(ModContainer container) {
         NeoForge.EVENT_BUS.register(this);
@@ -41,8 +40,8 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         Path modFolder = event.getServer().getWorldPath(new LevelResource("serverconfig"));
-        BANLIST = JsonUtils.initialize(modFolder, "serverconfig", "itemblacklist.json");
-        BANNED_ITEMS = JsonUtils.readItemsFromJson(BANLIST);
+        BLACKLIST_FILE = JsonUtils.initialize(modFolder, "itemblacklist.json");
+        BLACKLIST = JsonUtils.readFromJson(BLACKLIST_FILE);
     }
 
     @SubscribeEvent
@@ -61,7 +60,7 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onItemPickup(ItemEntityPickupEvent.Pre event) {
-        if(shouldDelete(event.getItemEntity().getItem())) {
+        if(shouldDelete(event.getItemEntity().getItem(), event.getPlayer())) {
             event.getItemEntity().remove(Entity.RemovalReason.KILLED);
             event.setCanPickup(TriState.FALSE);
         }
@@ -70,20 +69,24 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
         for(int i = 0; i < event.getContainer().slots.size(); ++i) {
-            if(shouldDelete(event.getContainer().getSlot(i).getItem())) {
+            if(shouldDelete(event.getContainer().getSlot(i).getItem(), event.getEntity())) {
                 event.getContainer().getSlot(i).set(ItemStack.EMPTY);
             }
         }
     }
 
     public static boolean shouldDelete(ItemStack stack) {
+        return shouldDelete(stack, null);
+    }
+
+    public static boolean shouldDelete(ItemStack stack, @Nullable Player player) {
         BanItemEvent event = new BanItemEvent(stack);
         NeoForge.EVENT_BUS.post(event);
         if(event.deleteItem) {
             return true;
         }
         else {
-            return BANNED_ITEMS.contains(stack.getItem());
+            return BLACKLIST.shouldBan(stack, player);
         }
     }
 

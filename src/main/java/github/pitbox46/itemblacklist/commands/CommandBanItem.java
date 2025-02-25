@@ -44,7 +44,7 @@ public class CommandBanItem implements Command<CommandSourceStack> {
     private static int banItem(CommandContext<CommandSourceStack> context, Item item) {
         if(item == Items.AIR)
             return 1;
-        JsonUtils.appendItemToJson(ItemBlacklist.BANLIST, item);
+        JsonUtils.appendItemToJson(ItemBlacklist.BLACKLIST_FILE, item);
         PlayerList playerList = context.getSource().getServer().getPlayerList();
         Utils.broadcastMessage(context.getSource().getServer(),
                 Component.literal("Item banned: ")

@@ -32,7 +32,7 @@ public class CommandUnbanItem implements Command<CommandSourceStack> {
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         try {
-            JsonUtils.removeItemFromJson(ItemBlacklist.BANLIST, ItemArgument.getItem(context, "item").getItem());
+            JsonUtils.removeItemFromJson(ItemBlacklist.BLACKLIST_FILE, ItemArgument.getItem(context, "item").getItem());
             Utils.broadcastMessage(context.getSource().getServer(),
                     Component.literal("Item unbanned: ")
                             .append(BuiltInRegistries.ITEM.getKey(ItemArgument.getItem(context, "item").getItem()).toString()));
@@ -45,7 +45,7 @@ public class CommandUnbanItem implements Command<CommandSourceStack> {
     public static class UnbanAll implements Command<CommandSourceStack>{
         @Override
         public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-            JsonUtils.removeAllItemsFromJson(ItemBlacklist.BANLIST);
+            JsonUtils.removeAllItemsFromJson(ItemBlacklist.BLACKLIST_FILE);
             Utils.broadcastMessage(context.getSource().getServer(), Component.literal("All items unbanned"));
             return 0;
         }
