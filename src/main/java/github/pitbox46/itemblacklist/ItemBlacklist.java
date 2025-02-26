@@ -1,12 +1,11 @@
 package github.pitbox46.itemblacklist;
 
 import github.pitbox46.itemblacklist.blacklist.Blacklist;
+import github.pitbox46.itemblacklist.blacklist.ItemBanPredicate;
 import github.pitbox46.itemblacklist.commands.ModCommands;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,6 +17,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.Collection;
 
 @Mod("itemblacklist")
 public class ItemBlacklist {
@@ -42,6 +42,11 @@ public class ItemBlacklist {
         Path modFolder = event.getServer().getWorldPath(new LevelResource("serverconfig"));
         BLACKLIST_FILE = JsonUtils.initialize(modFolder, "itemblacklist.json");
         BLACKLIST = JsonUtils.readFromJson(BLACKLIST_FILE);
+    }
+
+    @SubscribeEvent
+    public void onServerSave(LevelEvent.Save event) {
+        JsonUtils.writeJson(BLACKLIST_FILE, BLACKLIST);
     }
 
     @SubscribeEvent
@@ -90,11 +95,11 @@ public class ItemBlacklist {
         }
     }
 
-    public static String itemListToString(Set<Item> itemList) {
+    public static String itemListToString(Collection<ItemBanPredicate> itemList) {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
-        for(Item item: itemList) {
-            builder.append(BuiltInRegistries.ITEM.getKey(item)).append(", ");
+        for(ItemBanPredicate pred: itemList) {
+            builder.append(pred.predicateStack().getItem()).append(", ");
         }
         if(!itemList.isEmpty()) {
             builder.delete(builder.length() - 2, builder.length());

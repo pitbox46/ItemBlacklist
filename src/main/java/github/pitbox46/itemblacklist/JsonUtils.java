@@ -3,6 +3,8 @@ package github.pitbox46.itemblacklist;
 import com.google.gson.*;
 import com.mojang.serialization.JsonOps;
 import github.pitbox46.itemblacklist.blacklist.Blacklist;
+import github.pitbox46.itemblacklist.blacklist.Group;
+import net.minecraft.Util;
 import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.fml.loading.FMLPaths;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class JsonUtils {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -29,7 +33,18 @@ public class JsonUtils {
                 } else {
                     //If a default config file doesn't exist, create a null file
                     FileWriter configWriter = new FileWriter(file);
-                    Blacklist emptyBlacklist = new Blacklist(new ArrayList<>(), new ArrayList<>());
+                    Group defaultGroup = new Group(
+                            "default",
+                            new Group.Properties(
+                                    0,
+                                    5,
+                                    Optional.empty(),
+                                    Optional.empty(),
+                                    Optional.empty(),
+                                    Optional.empty()
+                            )
+                    );
+                    Blacklist emptyBlacklist = new Blacklist(new ArrayList<>(), Util.make(new ArrayList<>(1), l -> l.add(defaultGroup)));
                     configWriter.write(GSON.toJson(emptyBlacklist.encodeToJSON()));
                     configWriter.close();
                 }

@@ -23,11 +23,11 @@ public record Group(String name, Properties properties) implements Predicate<Pla
     }
 
     public record Properties(
-            Integer opLevelMax,
             Integer opLevelMin,
+            Integer opLevelMax,
             Optional<HashSet<String>> usernamesWhitelisted,
             Optional<HashSet<String>> usernamesBlacklisted,
-            Optional<HashSet<String>> teamsWhitelisted,
+            Optional<HashSet<String>> teams,
             Optional<HashSet<String>> teamsBlacklisted
     ) implements Predicate<Player> {
         public static Codec<Properties> CODEC = RecordCodecBuilder.create(instance ->
@@ -40,15 +40,23 @@ public record Group(String name, Properties properties) implements Predicate<Pla
                         ExtraCodecs.PLAYER_NAME.listOf().optionalFieldOf("usernames_blacklist")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
                                 .forGetter(Properties::usernamesBlacklisted),
-                        Codec.STRING.listOf().optionalFieldOf("teams_whitelist")
+                        Codec.STRING.listOf().optionalFieldOf("teams")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
-                                .forGetter(Properties::teamsWhitelisted),
+                                .forGetter(Properties::teams),
                         Codec.STRING.listOf().optionalFieldOf("teams_blacklist")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
                                 .forGetter(Properties::teamsBlacklisted)
                 ).apply(instance, Properties::new)
         );
 
+        /**
+         * Usernames take precedent. If the usernames don't match, then
+         * we go to teams. If the player is a part of a team, then blacklisted teams aren't
+         * included. If the team is whitelisted, the player is only included if they also match
+         * the permission levels.
+         * @param player the input argument
+         * @return If the player belongs to the group
+         */
         public boolean test(Player player) {
             String username = player.getGameProfile().getName();
             if (usernamesWhitelisted.map(s -> s.contains(username)).orElse(false)) {
@@ -58,19 +66,18 @@ public record Group(String name, Properties properties) implements Predicate<Pla
                 return false;
             }
 
+            int opLevel = player.getPermissionLevel();
             String team = player.getTeam() == null ? null : player.getTeam().getName();
-            if (team != null) {
-                if (teamsWhitelisted.map(s -> s.contains(team)).orElse(false)) {
-                    return true;
-                }
-                if (teamsBlacklisted.map(s -> s.contains(team)).orElse(false)) {
-                    return false;
-                }
+            if (team == null) {
+                return opLevelMin <= opLevel && opLevelMax >= opLevel;
             }
 
-            int opLevel = player.getPermissionLevel();
-            if (opLevelMin <= opLevel && opLevelMax >= opLevel) {
-                return true;
+            if (teamsBlacklisted.map(s -> s.contains(team)).orElse(false)) {
+                return false;
+            }
+
+            if (teams.map(s -> s.contains(team)).orElse(false)) {
+                return opLevelMin <= opLevel && opLevelMax >= opLevel;
             }
 
             return false;

@@ -12,8 +12,10 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 public class CommandUnbanItem implements Command<CommandSourceStack> {
     private static final CommandUnbanItem CMD = new CommandUnbanItem();
@@ -32,7 +34,13 @@ public class CommandUnbanItem implements Command<CommandSourceStack> {
     @Override
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         try {
-            JsonUtils.removeItemFromJson(ItemBlacklist.BLACKLIST_FILE, ItemArgument.getItem(context, "item").getItem());
+            ItemInput itemInput = ItemArgument.getItem(context, "item");
+            ItemStack stack = itemInput.createItemStack(1, false);
+            if (stack.getComponentsPatch().isEmpty()) {
+                ItemBlacklist.BLACKLIST.searchAndRemove(stack.getItem());
+            } else {
+                ItemBlacklist.BLACKLIST.searchAndRemove(stack);
+            }
             Utils.broadcastMessage(context.getSource().getServer(),
                     Component.literal("Item unbanned: ")
                             .append(BuiltInRegistries.ITEM.getKey(ItemArgument.getItem(context, "item").getItem()).toString()));
@@ -45,7 +53,7 @@ public class CommandUnbanItem implements Command<CommandSourceStack> {
     public static class UnbanAll implements Command<CommandSourceStack>{
         @Override
         public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-            JsonUtils.removeAllItemsFromJson(ItemBlacklist.BLACKLIST_FILE);
+            ItemBlacklist.BLACKLIST.bannedItems().clear();
             Utils.broadcastMessage(context.getSource().getServer(), Component.literal("All items unbanned"));
             return 0;
         }

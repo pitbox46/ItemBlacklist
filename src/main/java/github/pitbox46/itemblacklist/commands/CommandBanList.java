@@ -24,7 +24,7 @@ public class CommandBanList implements Command<CommandSourceStack> {
     public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         context.getSource().getPlayerOrException().displayClientMessage(
                 Component.literal("Items banned: ")
-                        .append(ItemBlacklist.itemListToString(ItemBlacklist.BANNED_ITEMS)),
+                        .append(ItemBlacklist.itemListToString(ItemBlacklist.BLACKLIST.bannedItems())),
                 false);
         return 0;
     }
