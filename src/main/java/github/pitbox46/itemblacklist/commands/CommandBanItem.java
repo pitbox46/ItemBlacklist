@@ -1,10 +1,9 @@
 package github.pitbox46.itemblacklist.commands;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import github.pitbox46.itemblacklist.Utils;
 import github.pitbox46.itemblacklist.blacklist.Blacklist;
@@ -17,29 +16,41 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.item.ItemStack;
 
-public class CommandBanItem implements Command<CommandSourceStack> {
-    private static final CommandBanItem CMD = new CommandBanItem();
-
+public class CommandBanItem {
     public static ArgumentBuilder<CommandSourceStack, ?> register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
         return Commands
                 .literal("ban")
                 .requires(cs -> cs.hasPermission(2))
-                .then(Commands.argument("item", ItemArgument.item(context)).executes(CMD))
-                .then(Commands.literal("hand").executes(ctx -> {
-                    ItemStack stack = ctx.getSource().getPlayerOrException().getMainHandItem();
-                    return banItem(ctx, stack);
-                }));
+                .then(Commands.argument("item", ItemArgument.item(context))
+                        .executes(ctx -> banItem(
+                                ctx,
+                                ItemArgument.getItem(ctx, "item").createItemStack(1, false),
+                                "default")
+                        )
+                        .then(Commands.argument("group", StringArgumentType.word())
+                                .executes(ctx -> banItem(
+                                        ctx,
+                                        ItemArgument.getItem(ctx, "item").createItemStack(1, false),
+                                        StringArgumentType.getString(ctx, "group")))
+                        )
+                )
+                .then(Commands.literal("hand")
+                        .executes(ctx -> {
+                            ItemStack stack = ctx.getSource().getPlayerOrException().getMainHandItem();
+                            return banItem(ctx, stack, "default");
+                        }).then(Commands.argument("group", StringArgumentType.word())
+                                .executes(ctx -> banItem(
+                                        ctx,
+                                        ctx.getSource().getPlayerOrException().getMainHandItem(),
+                                        StringArgumentType.getString(ctx, "group")))
+                        )
+                );
     }
 
-    @Override
-    public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return banItem(context, ItemArgument.getItem(context, "item").createItemStack(1, false));
-    }
-
-    private static int banItem(CommandContext<CommandSourceStack> context, ItemStack stack) {
+    private static int banItem(CommandContext<CommandSourceStack> context, ItemStack stack, String group) {
         if(stack.isEmpty())
             return 1;
-        ItemBlacklist.BLACKLIST.addItem(stack.copy());
+        ItemBlacklist.BLACKLIST.addItem(stack.copy(), group);
 
         PlayerList playerList = context.getSource().getServer().getPlayerList();
         Utils.broadcastMessage(context.getSource().getServer(),

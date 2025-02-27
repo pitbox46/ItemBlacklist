@@ -43,9 +43,18 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
     }
 
     /**
-     * Simple function that bans a singular item. We use the default group
+     * Bans an item stack. We use the default group
      */
     public void addItem(ItemStack stack) {
+        addItem(stack, "default");
+    }
+
+    /**
+     * Bans an item stack. Uses the component patch if it exists
+     * @param stack The itemstack
+     * @param group The group
+     */
+    public void addItem(ItemStack stack, String group) {
         if (stack.isEmpty()) {
             return;
         }
@@ -56,9 +65,15 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
                         stack.getComponentsPatch()
                 )))
                 .build();
-        ItemBanPredicate pred = new ItemBanPredicate(itemPredicate, Util.make(new ArrayList<>(), l -> l.add("default")));
-        bannedItems.add(pred);
-        pred.mapGroups(groups);
+        var matchingPred = bannedItems.stream().filter(pred -> itemPredicate.equals(pred.itemPredicate())).findAny();
+        if (matchingPred.isPresent()) {
+            matchingPred.get().groups().add(group);
+            matchingPred.get().mapGroups(groups);
+        } else {
+            ItemBanPredicate pred = new ItemBanPredicate(itemPredicate, Util.make(new ArrayList<>(), l -> l.add(group)));
+            bannedItems.add(pred);
+            pred.mapGroups(groups);
+        }
     }
 
     /**
