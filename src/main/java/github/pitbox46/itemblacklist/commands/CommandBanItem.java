@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import github.pitbox46.itemblacklist.Utils;
+import github.pitbox46.itemblacklist.blacklist.Blacklist;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -39,16 +40,21 @@ public class CommandBanItem implements Command<CommandSourceStack> {
         if(stack.isEmpty())
             return 1;
         ItemBlacklist.BLACKLIST.addItem(stack);
+
         PlayerList playerList = context.getSource().getServer().getPlayerList();
         Utils.broadcastMessage(context.getSource().getServer(),
                 Component.literal("Item banned: ")
                         .append(stack.getItem().toString()));
+
         for(ServerPlayer player : playerList.getPlayers()) {
             for(int i = 0; i < player.getInventory().getContainerSize(); i++) {
-                if(ItemBlacklist.shouldDelete(player.getInventory().getItem(i), player))
-                    player.getInventory().getItem(i).setCount(0);
+                ItemStack stackInSlot = player.getInventory().getItem(i);
+                if(ItemBlacklist.shouldDelete(stackInSlot, player))
+                    stackInSlot.setCount(0);
             }
         }
+
+        Blacklist.MASTER_CALC_VER++;
         return 0;
     }
 }

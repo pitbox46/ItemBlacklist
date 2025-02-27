@@ -8,7 +8,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.Util;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -49,15 +48,6 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
         ItemBanPredicate pred = new ItemBanPredicate(stack, Util.make(new ArrayList<>(), l -> l.add("default")));
         bannedItems.add(pred);
         pred.mapGroups(groups);
-    }
-
-    /**
-     * Naively removes any ban whose item predicate contains the given item
-     * @param item The item to search for
-     * @return If any bans were removed
-     */
-    public boolean searchAndRemove(Item item) {
-        return bannedItems.removeIf(pred -> pred.predicateStack().is(item));
     }
 
     /**

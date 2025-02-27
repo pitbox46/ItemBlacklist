@@ -57,7 +57,7 @@ public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
         }
 
         //Reset the cache if the master version tells us to
-        if (Blacklist.MASTER_CALC_VER >= calcVer) {
+        if (Blacklist.MASTER_CALC_VER > calcVer) {
             cachedPlayers.clear();
             calcVer = Blacklist.MASTER_CALC_VER;
         }
