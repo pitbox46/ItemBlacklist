@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
     public static final Codec<ItemBanPredicate> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    ItemPredicate.CODEC.fieldOf("item").forGetter(ItemBanPredicate::itemPredicate),
+                    ItemPredicate.CODEC.fieldOf("item_predicate").forGetter(ItemBanPredicate::itemPredicate),
                     Codec.STRING.listOf()
                             .optionalFieldOf("groups", new ArrayList<>())
                             .xmap(ArrayList::new, ArrayList::new).forGetter(ItemBanPredicate::groups)
