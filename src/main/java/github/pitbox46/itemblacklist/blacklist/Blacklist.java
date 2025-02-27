@@ -9,8 +9,7 @@ import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.Util;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -50,14 +49,12 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
         if (stack.isEmpty()) {
             return;
         }
-        DataComponentMap components = stack.getComponents();
         ItemPredicate itemPredicate = ItemPredicate.Builder.item()
                 .of(BuiltInRegistries.ITEM, stack.getItem())
-                .hasComponents(DataComponentPredicate.allOf(components.filter(type -> {
-                    Optional<?> value = stack.getComponentsPatch().get(type);
-                    value = value == null ? Optional.empty() : value;
-                    return value.map(v -> v.equals(components.get(type))).orElse(false);
-                })))
+                .hasComponents(DataComponentPredicate.allOf(PatchedDataComponentMap.fromPatch(
+                        DataComponentMap.EMPTY,
+                        stack.getComponentsPatch()
+                )))
                 .build();
         ItemBanPredicate pred = new ItemBanPredicate(itemPredicate, Util.make(new ArrayList<>(), l -> l.add("default")));
         bannedItems.add(pred);
