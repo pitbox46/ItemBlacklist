@@ -3,6 +3,7 @@ package github.pitbox46.itemblacklist;
 import github.pitbox46.itemblacklist.blacklist.Blacklist;
 import github.pitbox46.itemblacklist.blacklist.ItemBanPredicate;
 import github.pitbox46.itemblacklist.commands.ModCommands;
+import net.minecraft.core.HolderSet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -41,7 +42,7 @@ public class ItemBlacklist {
     public void onServerStarting(ServerStartingEvent event) {
         Path modFolder = event.getServer().getWorldPath(new LevelResource("serverconfig"));
         BLACKLIST_FILE = JsonUtils.initialize(modFolder, "itemblacklist.json", event.getServer().registryAccess());
-        BLACKLIST = JsonUtils.readFromJson(BLACKLIST_FILE);
+        BLACKLIST = JsonUtils.readFromJson(BLACKLIST_FILE, event.getServer().registryAccess());
     }
 
     @SubscribeEvent
@@ -99,7 +100,7 @@ public class ItemBlacklist {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for(ItemBanPredicate pred: itemList) {
-            builder.append(pred.predicateStack().getItem()).append(", ");
+            builder.append(pred.itemPredicate().items().orElse(HolderSet.empty())).append(", ");
         }
         if(!itemList.isEmpty()) {
             builder.delete(builder.length() - 2, builder.length());

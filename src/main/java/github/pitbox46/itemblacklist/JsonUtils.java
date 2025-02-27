@@ -39,11 +39,11 @@ public class JsonUtils {
         return file;
     }
 
-    public static Blacklist readFromJson(File jsonFile) {
+    public static Blacklist readFromJson(File jsonFile, RegistryAccess registryAccess) {
         try {
             Reader reader = new FileReader(jsonFile);
             JsonObject json = GSON.fromJson(reader, JsonObject.class);
-            return Blacklist.readBlacklist(json);
+            return Blacklist.readBlacklist(registryAccess, json);
         } catch (IOException e) {
             LOGGER.error(e);
         }

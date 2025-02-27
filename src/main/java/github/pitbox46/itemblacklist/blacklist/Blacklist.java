@@ -7,7 +7,11 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.Util;
+import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -46,7 +50,16 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
         if (stack.isEmpty()) {
             return;
         }
-        ItemBanPredicate pred = new ItemBanPredicate(stack, Util.make(new ArrayList<>(), l -> l.add("default")));
+        DataComponentMap components = stack.getComponents();
+        ItemPredicate itemPredicate = ItemPredicate.Builder.item()
+                .of(BuiltInRegistries.ITEM, stack.getItem())
+                .hasComponents(DataComponentPredicate.allOf(components.filter(type -> {
+                    Optional<?> value = stack.getComponentsPatch().get(type);
+                    value = value == null ? Optional.empty() : value;
+                    return value.map(v -> v.equals(components.get(type))).orElse(false);
+                })))
+                .build();
+        ItemBanPredicate pred = new ItemBanPredicate(itemPredicate, Util.make(new ArrayList<>(), l -> l.add("default")));
         bannedItems.add(pred);
         pred.mapGroups(groups);
     }
@@ -57,7 +70,11 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
      * @return If any bans were removed
      */
     public boolean searchAndRemove(ItemStack stack) {
-        return bannedItems.removeIf(pred -> pred.testItemStack(stack));
+        return bannedItems.removeIf(pred -> pred.itemPredicate()
+                .items()
+                .map(s -> s.contains(stack.getItemHolder()))
+                .orElse(false)
+        );
     }
 
     public static Blacklist emptyBlacklist() {
@@ -73,8 +90,8 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
         return encoded.result().orElseThrow();
     }
 
-    public static Blacklist readBlacklist(JsonObject json) {
-        Blacklist blacklist = CODEC.parse(JsonOps.INSTANCE, json)
+    public static Blacklist readBlacklist(HolderLookup.Provider levelRegistryAccess, JsonObject json) {
+        Blacklist blacklist = CODEC.parse(levelRegistryAccess.createSerializationContext(JsonOps.INSTANCE), json)
                 .resultOrPartial(m -> ItemBlacklist.LOGGER.warn("Could not read blacklist: {}", m))
                 .orElseGet(Blacklist::emptyBlacklist);
         blacklist.bannedItems().forEach(pred -> pred.mapGroups(blacklist.groups()));
