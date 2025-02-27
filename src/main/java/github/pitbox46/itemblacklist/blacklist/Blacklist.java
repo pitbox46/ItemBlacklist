@@ -43,6 +43,9 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
      * Simple function that bans a singular item. We use the default group
      */
     public void addItem(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
         ItemBanPredicate pred = new ItemBanPredicate(stack, Util.make(new ArrayList<>(), l -> l.add("default")));
         bannedItems.add(pred);
         pred.mapGroups(groups);

@@ -30,10 +30,11 @@ public abstract class BlockEntityMixin extends net.neoforged.neoforge.attachment
     @Inject(at = @At(value = "HEAD"), method = "setChanged()V")
     public void onMarkDirty(CallbackInfo ci) {
         if(level != null) {
-            if (this instanceof Container) {
-                for (int i = 0; i < ((Container) this).getContainerSize(); i++) {
-                    if (ItemBlacklist.shouldDelete(((Container) this).getItem(i))) {
-                        ((Container) this).setItem(i, ItemStack.EMPTY);
+            if (this instanceof Container container) {
+                for (int i = 0; i < container.getContainerSize(); i++) {
+                    ItemStack stack = container.getItem(i);
+                    if (ItemBlacklist.shouldDelete(stack)) {
+                        container.removeItemNoUpdate(i);
                     }
                 }
             } else {

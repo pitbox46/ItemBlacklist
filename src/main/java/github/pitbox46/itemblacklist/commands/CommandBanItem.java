@@ -26,9 +26,7 @@ public class CommandBanItem implements Command<CommandSourceStack> {
                 .then(Commands.argument("item", ItemArgument.item(context)).executes(CMD))
                 .then(Commands.literal("hand").executes(ctx -> {
                     ItemStack stack = ctx.getSource().getPlayerOrException().getMainHandItem();
-                    int i = banItem(ctx, ctx.getSource().getPlayerOrException().getMainHandItem());
-                    stack.setCount(0);
-                    return i;
+                    return banItem(ctx, stack);
                 }));
     }
 

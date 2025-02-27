@@ -76,7 +76,7 @@ public record Group(String name, Properties properties) implements Predicate<Pla
                 return false;
             }
 
-            if (teams.map(s -> s.contains(team)).orElse(false)) {
+            if (teams.map(s -> s.contains(team)).orElse(true)) {
                 return opLevelMin <= opLevel && opLevelMax >= opLevel;
             }
 
