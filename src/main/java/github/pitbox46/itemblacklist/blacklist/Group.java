@@ -30,6 +30,13 @@ public record Group(String name, Properties properties) implements Predicate<Pla
             Optional<HashSet<String>> teams,
             Optional<HashSet<String>> teamsBlacklisted
     ) implements Predicate<Player> {
+        public static Properties EMPTY = new Properties(
+                0,
+                5,
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty());
         public static Codec<Properties> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
                         Codec.INT.optionalFieldOf("op_level_min", 0).forGetter(Properties::opLevelMin),

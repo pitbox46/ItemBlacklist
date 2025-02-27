@@ -1,10 +1,8 @@
 package github.pitbox46.itemblacklist;
 
 import com.google.gson.*;
-import com.mojang.serialization.JsonOps;
 import github.pitbox46.itemblacklist.blacklist.Blacklist;
-import github.pitbox46.itemblacklist.blacklist.Group;
-import net.minecraft.Util;
+import net.minecraft.core.RegistryAccess;
 import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.fml.loading.FMLPaths;
 import org.apache.logging.log4j.LogManager;
@@ -14,15 +12,12 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 public class JsonUtils {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static File initialize(Path folder, String fileName) {
+    public static File initialize(Path folder, String fileName, RegistryAccess registryAccess) {
         File file = new File(folder.toFile(), fileName);
         try {
             if(file.createNewFile()) {
@@ -33,19 +28,8 @@ public class JsonUtils {
                 } else {
                     //If a default config file doesn't exist, create a null file
                     FileWriter configWriter = new FileWriter(file);
-                    Group defaultGroup = new Group(
-                            "default",
-                            new Group.Properties(
-                                    0,
-                                    5,
-                                    Optional.empty(),
-                                    Optional.empty(),
-                                    Optional.empty(),
-                                    Optional.empty()
-                            )
-                    );
-                    Blacklist emptyBlacklist = new Blacklist(new ArrayList<>(), Util.make(new ArrayList<>(1), l -> l.add(defaultGroup)));
-                    configWriter.write(GSON.toJson(emptyBlacklist.encodeToJSON()));
+                    Blacklist emptyBlacklist = Blacklist.emptyBlacklist();
+                    configWriter.write(GSON.toJson(emptyBlacklist.encodeToJSON(registryAccess)));
                     configWriter.close();
                 }
             }
@@ -66,10 +50,10 @@ public class JsonUtils {
         return null;
     }
 
-    public static void writeJson(File jsonFile, Blacklist blacklist) {
+    public static void writeJson(File jsonFile, Blacklist blacklist, RegistryAccess registryAccess) {
         try (Reader reader = new FileReader(jsonFile)) {
             try (FileWriter fileWriter = new FileWriter(jsonFile)) {
-                fileWriter.write(GSON.toJson(blacklist.encodeToJSON()));
+                fileWriter.write(GSON.toJson(blacklist.encodeToJSON(registryAccess)));
             }
         } catch (IOException e) {
             LOGGER.error(e);

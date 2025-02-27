@@ -40,13 +40,13 @@ public class ItemBlacklist {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         Path modFolder = event.getServer().getWorldPath(new LevelResource("serverconfig"));
-        BLACKLIST_FILE = JsonUtils.initialize(modFolder, "itemblacklist.json");
+        BLACKLIST_FILE = JsonUtils.initialize(modFolder, "itemblacklist.json", event.getServer().registryAccess());
         BLACKLIST = JsonUtils.readFromJson(BLACKLIST_FILE);
     }
 
     @SubscribeEvent
     public void onServerSave(LevelEvent.Save event) {
-        JsonUtils.writeJson(BLACKLIST_FILE, BLACKLIST);
+        JsonUtils.writeJson(BLACKLIST_FILE, BLACKLIST, event.getLevel().registryAccess());
     }
 
     @SubscribeEvent

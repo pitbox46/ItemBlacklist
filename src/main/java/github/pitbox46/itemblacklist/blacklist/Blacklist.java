@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -59,16 +60,23 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
         return bannedItems.removeIf(pred -> pred.testItemStack(stack));
     }
 
+    public static Blacklist emptyBlacklist() {
+        return new Blacklist(
+                new ArrayList<>(),
+                Util.make(new ArrayList<>(), l -> l.add(new Group("default", Group.Properties.EMPTY)))
+        );
+    }
+
     //region serialization
-    public JsonElement encodeToJSON() {
-        var encoded = Blacklist.CODEC.encodeStart(JsonOps.INSTANCE, this);
+    public JsonElement encodeToJSON(HolderLookup.Provider levelRegistryAccess) {
+        var encoded = Blacklist.CODEC.encodeStart(levelRegistryAccess.createSerializationContext(JsonOps.INSTANCE), this);
         return encoded.result().orElseThrow();
     }
 
     public static Blacklist readBlacklist(JsonObject json) {
         Blacklist blacklist = CODEC.parse(JsonOps.INSTANCE, json)
                 .resultOrPartial(m -> ItemBlacklist.LOGGER.warn("Could not read blacklist: {}", m))
-                .orElseGet(() -> new Blacklist(new ArrayList<>(), new ArrayList<>()));
+                .orElseGet(Blacklist::emptyBlacklist);
         blacklist.bannedItems().forEach(pred -> pred.mapGroups(blacklist.groups()));
         return blacklist;
     }

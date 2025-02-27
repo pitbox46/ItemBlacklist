@@ -39,7 +39,7 @@ public class CommandBanItem implements Command<CommandSourceStack> {
     private static int banItem(CommandContext<CommandSourceStack> context, ItemStack stack) {
         if(stack.isEmpty())
             return 1;
-        ItemBlacklist.BLACKLIST.addItem(stack);
+        ItemBlacklist.BLACKLIST.addItem(stack.copy());
 
         PlayerList playerList = context.getSource().getServer().getPlayerList();
         Utils.broadcastMessage(context.getSource().getServer(),
