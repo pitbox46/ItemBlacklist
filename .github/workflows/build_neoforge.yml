@@ -26,11 +26,11 @@ jobs:
 
       - name: Grant Execute Permission for Gradle
         run: |
-          chmod +x gradlew
+          chmod +x ./gradlew
 
       - name: Build with Gradle
         run: |
-          (gradlew build)
+          (./gradlew build)
 
       - name: mc-publish neoforge
         uses: Kira-NT/mc-publish@v3.3.0
