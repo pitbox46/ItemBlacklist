@@ -82,11 +82,7 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
      * @return If any bans were removed
      */
     public boolean searchAndRemove(ItemStack stack) {
-        return bannedItems.removeIf(pred -> pred.itemPredicate()
-                .items()
-                .map(s -> s.contains(stack.getItemHolder()))
-                .orElse(false)
-        );
+        return bannedItems.removeIf(pred -> pred.itemPredicate().test(stack));
     }
 
     public static Blacklist emptyBlacklist() {

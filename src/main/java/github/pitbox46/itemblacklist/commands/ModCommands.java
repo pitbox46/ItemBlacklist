@@ -24,7 +24,7 @@ public class ModCommands {
                             return 0;
                         }))
                 .then(Commands
-                        .literal("reset_groups")
+                        .literal("recalculate")
                         .requires(cs -> cs.hasPermission(2))
                         .executes(ctx -> {
                             Blacklist.MASTER_CALC_VER++;

@@ -1,1 +1,2 @@
-- Use mc-publish
+- Overhaul file system to use ItemPredicates rather than just item id
+- Add groups system
