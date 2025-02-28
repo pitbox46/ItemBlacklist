@@ -23,27 +23,27 @@ public record Group(String name, Properties properties) implements Predicate<Pla
     }
 
     public record Properties(
-            Integer opLevelMin,
-            Integer opLevelMax,
-            Optional<HashSet<String>> usernamesWhitelisted,
+            Optional<Integer> opLevelMin,
+            Optional<Integer> opLevelMax,
+            Optional<HashSet<String>> usernames,
             Optional<HashSet<String>> usernamesBlacklisted,
             Optional<HashSet<String>> teams,
             Optional<HashSet<String>> teamsBlacklisted
     ) implements Predicate<Player> {
         public static Properties EMPTY = new Properties(
-                0,
-                5,
+                Optional.empty(),
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty());
         public static Codec<Properties> CODEC = RecordCodecBuilder.create(instance ->
                 instance.group(
-                        Codec.INT.optionalFieldOf("op_level_min", 0).forGetter(Properties::opLevelMin),
-                        Codec.INT.optionalFieldOf("op_level_max", 5).forGetter(Properties::opLevelMax),
-                        ExtraCodecs.PLAYER_NAME.listOf().optionalFieldOf("usernames_whitelist")
+                        Codec.INT.optionalFieldOf("op_level_min").forGetter(Properties::opLevelMin),
+                        Codec.INT.optionalFieldOf("op_level_max").forGetter(Properties::opLevelMax),
+                        ExtraCodecs.PLAYER_NAME.listOf().optionalFieldOf("usernames")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
-                                .forGetter(Properties::usernamesWhitelisted),
+                                .forGetter(Properties::usernames),
                         ExtraCodecs.PLAYER_NAME.listOf().optionalFieldOf("usernames_blacklist")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
                                 .forGetter(Properties::usernamesBlacklisted),
@@ -65,29 +65,33 @@ public record Group(String name, Properties properties) implements Predicate<Pla
          * @return If the player belongs to the group
          */
         public boolean test(Player player) {
-            String username = player.getGameProfile().getName();
-            if (usernamesWhitelisted.map(s -> s.contains(username)).orElse(false)) {
+            if (this.equals(EMPTY)) {
                 return true;
             }
+
+            String username = player.getGameProfile().getName();
             if (usernamesBlacklisted.map(s -> s.contains(username)).orElse(false)) {
                 return false;
             }
 
             int opLevel = player.getPermissionLevel();
-            String team = player.getTeam() == null ? null : player.getTeam().getName();
-            if (team == null) {
-                return opLevelMin <= opLevel && opLevelMax >= opLevel;
+            if (opLevelMin.map(i -> opLevel < i).orElse(false)) {
+                return false;
             }
-
-            if (teamsBlacklisted.map(s -> s.contains(team)).orElse(false)) {
+            if (opLevelMax.map(i -> opLevel > i).orElse(false)) {
                 return false;
             }
 
-            if (teams.map(s -> s.contains(team)).orElse(true)) {
-                return opLevelMin <= opLevel && opLevelMax >= opLevel;
+            String team = player.getTeam() == null ? null : player.getTeam().getName();
+            boolean teamFlag = teams.isEmpty();
+            if (team != null) {
+                if (teamsBlacklisted.map(s -> s.contains(team)).orElse(false)) {
+                    return false;
+                }
+                teamFlag = teams.map(s -> s.contains(team)).orElse(false);
             }
 
-            return false;
+            return teamFlag && usernames.map(s -> s.contains(username)).orElse(true);
         }
     }
 }
