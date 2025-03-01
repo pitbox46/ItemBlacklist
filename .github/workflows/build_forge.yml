@@ -1,4 +1,4 @@
-name: Build Neoforge
+name: Build Forge
 
 on:
   workflow_dispatch:
