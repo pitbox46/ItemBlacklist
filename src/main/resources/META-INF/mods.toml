@@ -4,7 +4,7 @@ license = "MIT License"
 
 [[mods]]
 modId = "itemblacklist"
-version = "$1.20.1-1.1.0"
+version = "1.20.1-1.1.0"
 displayName = "Item Blacklist"
 authors = "pitbox46"
 description ="Allows Blacklisting Items on Servers"
