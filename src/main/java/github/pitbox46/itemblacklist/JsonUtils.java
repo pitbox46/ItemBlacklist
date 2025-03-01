@@ -1,13 +1,10 @@
 package github.pitbox46.itemblacklist;
 
 import com.google.gson.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.AirItem;
-import net.minecraft.world.item.Item;
+import github.pitbox46.itemblacklist.blacklist.Blacklist;
+import net.minecraft.core.RegistryAccess;
 import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,23 +12,24 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
-import java.util.Set;
 
 public class JsonUtils {
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static File initialize(Path folder, String folderName, String fileName) {
-        File file = new File(getOrCreateDirectory(folder.resolve(folderName)).toFile(), fileName);
+    public static File initialize(Path folder, String fileName, RegistryAccess registryAccess) {
+        File file = new File(folder.toFile(), fileName);
         try {
             if(file.createNewFile()) {
                 Path defaultConfigPath = FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath()).resolve("itemblacklist.json");
                 if (Files.exists(defaultConfigPath)) {
+                    //If a default config file exists, copy it
                     Files.copy(defaultConfigPath, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } else {
+                    //If a default config file doesn't exist, create a null file
                     FileWriter configWriter = new FileWriter(file);
-                    configWriter.write(gson.toJson(new JsonArray()));
+                    Blacklist emptyBlacklist = Blacklist.emptyBlacklist();
+                    configWriter.write(GSON.toJson(emptyBlacklist.encodeToJSON(registryAccess)));
                     configWriter.close();
                 }
             }
@@ -41,89 +39,24 @@ public class JsonUtils {
         return file;
     }
 
-    public static Path getOrCreateDirectory(Path path) {
-        try {
-            if (Files.exists(path)) {
-                return path;
-            } else {
-                return Files.createDirectory(path);
-            }
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Reads items from a Json that has a top level array
-     */
-    public static Set<Item> readItemsFromJson(File jsonFile) {
+    public static Blacklist readFromJson(File jsonFile, RegistryAccess registryAccess) {
         try {
             Reader reader = new FileReader(jsonFile);
-            JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
-            Set<Item> returnedArrays = new HashSet<>();
-            for(JsonElement element: array) {
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(element.getAsString()));
-                if(!(item == null || item instanceof AirItem)) {
-                    returnedArrays.add(item);
-                }
-            }
-            return returnedArrays;
+            JsonObject json = GSON.fromJson(reader, JsonObject.class);
+            return Blacklist.readBlacklist(registryAccess, json);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
         return null;
     }
 
-    /**
-     * Writes a new item to a json that has a top level array
-     */
-    public static void appendItemToJson(File jsonFile, Item item) {
+    public static void writeJson(File jsonFile, Blacklist blacklist, RegistryAccess registryAccess) {
         try (Reader reader = new FileReader(jsonFile)) {
-            JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
-
-            JsonPrimitive string = new JsonPrimitive(ForgeRegistries.ITEMS.getKey(item).toString());
-            if(!array.contains(string))
-                array.add(string);
-
             try (FileWriter fileWriter = new FileWriter(jsonFile)) {
-                fileWriter.write(gson.toJson(array));
+                fileWriter.write(GSON.toJson(blacklist.encodeToJSON(registryAccess)));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
-        ItemBlacklist.BANNED_ITEMS = JsonUtils.readItemsFromJson(ItemBlacklist.BANLIST);
-    }
-
-    /**
-     * Removes an item from a json that has a top level array
-     */
-    public static void removeItemFromJson(File jsonFile, Item item) throws IndexOutOfBoundsException {
-        try (Reader reader = new FileReader(jsonFile)) {
-            JsonArray array = GsonHelper.fromJson(gson, reader, JsonArray.class);
-            assert array != null;
-            int itemLocation = -1;
-            int i = 0;
-            for(JsonElement element: array) {
-                if(element.getAsString().equals(ForgeRegistries.ITEMS.getKey(item).toString())) itemLocation = i;
-                i++;
-            }
-            array.remove(itemLocation);
-            try (FileWriter fileWriter = new FileWriter(jsonFile)) {
-                fileWriter.write(gson.toJson(array));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ItemBlacklist.BANNED_ITEMS = JsonUtils.readItemsFromJson(ItemBlacklist.BANLIST);
-    }
-
-    public static void removeAllItemsFromJson(File jsonFile) throws IndexOutOfBoundsException {
-        try (FileWriter fileWriter = new FileWriter(jsonFile)) {
-            fileWriter.write(gson.toJson(new JsonArray()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ItemBlacklist.BANNED_ITEMS = JsonUtils.readItemsFromJson(ItemBlacklist.BANLIST);
     }
 }
