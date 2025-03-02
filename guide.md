@@ -73,6 +73,8 @@ Each JSON Object in the array contains `item_predicate` and `groups`.
 is a vanilla Minecraft `item_predicate` usually used for advancements and
 other data driven things. You can see an example for the advancement
 trigger [item_durability_changed](https://minecraft.wiki/w/Advancement_definition#minecraft:item_durability_changed).
+Note that this applies to 1.21 versions and up. `item_predicate` has slightly different syntax in 1.20.1, so
+you will have to do your own research.
 
 ### `"groups": [...]`
 
