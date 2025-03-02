@@ -2,6 +2,7 @@ package github.pitbox46.itemblacklist.blacklist;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import github.pitbox46.itemblacklist.mixins.EntityAccessor;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Player;
 
@@ -74,7 +75,7 @@ public record Group(String name, Properties properties) implements Predicate<Pla
                 return false;
             }
 
-            int opLevel = player.getPermissionLevel();
+            int opLevel = ((EntityAccessor) player).callGetPermissionLevel();
             if (opLevelMin.map(i -> opLevel < i).orElse(false)) {
                 return false;
             }

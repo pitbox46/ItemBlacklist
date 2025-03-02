@@ -7,9 +7,9 @@
   "mixins": [
     "BlockEntityMixin",
     "ContainerMixin",
+    "EntityAccessor",
     "MerchantMenuMixin",
-    "RecipeManagerMixin",
-    "RecipeMapMixin"
+    "RecipeManagerMixin"
   ],
   "client": [
   ],

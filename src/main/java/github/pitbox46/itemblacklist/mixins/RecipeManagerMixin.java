@@ -8,18 +8,27 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(RecipeManager.class)
 public class RecipeManagerMixin {
     @Inject(at = @At(value = "RETURN"), method = "getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeHolder;)Ljava/util/Optional;", cancellable = true)
-    private <I extends RecipeInput, T extends Recipe<I>> void onGetRecipe(RecipeType<T> pRecipeType, I pInput, Level pLevel, @Nullable RecipeHolder<T> holder, CallbackInfoReturnable<Optional<RecipeHolder<T>>> cir) {
+    private <I extends RecipeInput, T extends Recipe<I>> void onGetRecipe(RecipeType<T> p_220249_, I pInput, Level pLevel, RecipeHolder<T> p_346407_, CallbackInfoReturnable<Optional<RecipeHolder<T>>> cir) {
         cir.getReturnValue().ifPresent(value ->
                 cir.setReturnValue(ItemBlacklist.shouldDelete(
                         value.value().assemble(pInput, pLevel.registryAccess())) ?
                         Optional.empty() : Optional.of(value)
                 )
+        );
+    }
+
+    @Inject(at = @At(value = "RETURN"), method = "getRecipesFor", cancellable = true)
+    private <I extends RecipeInput, T extends Recipe<I>> void onGetRecipes(RecipeType<T> pRecipeType, I pInput, Level pLevel, CallbackInfoReturnable<List<RecipeHolder<T>>> cir) {
+        cir.setReturnValue(cir.getReturnValue()
+                .stream()
+                .filter(entry -> !ItemBlacklist.shouldDelete(entry.value().assemble(pInput, pLevel.registryAccess())))
+                .toList()
         );
     }
 }

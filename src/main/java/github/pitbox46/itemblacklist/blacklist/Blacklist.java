@@ -59,7 +59,7 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
             return;
         }
         ItemPredicate itemPredicate = ItemPredicate.Builder.item()
-                .of(BuiltInRegistries.ITEM, stack.getItem())
+                .of(stack.getItem())
                 .hasComponents(DataComponentPredicate.allOf(PatchedDataComponentMap.fromPatch(
                         DataComponentMap.EMPTY,
                         stack.getComponentsPatch()
