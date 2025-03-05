@@ -1,5 +1,6 @@
 package github.pitbox46.itemblacklist.mixins;
 
+import github.pitbox46.itemblacklist.Config;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,21 +30,23 @@ public abstract class BlockEntityMixin extends net.neoforged.neoforge.attachment
 
     @Inject(at = @At(value = "HEAD"), method = "setChanged()V")
     public void onMarkDirty(CallbackInfo ci) {
-        if(level != null) {
-            if (this instanceof Container container) {
-                for (int i = 0; i < container.getContainerSize(); i++) {
-                    ItemStack stack = container.getItem(i);
-                    if (ItemBlacklist.shouldDelete(stack)) {
-                        container.removeItemNoUpdate(i);
+        if (Config.BAN_CONTAINER.getAsBoolean() && Config.testBanRate()) {
+            if (level!=null) {
+                if (this instanceof Container container) {
+                    for (int i = 0; i < container.getContainerSize(); i++) {
+                        ItemStack stack = container.getItem(i);
+                        if (ItemBlacklist.shouldDelete(stack)) {
+                            container.removeItemNoUpdate(i);
+                        }
                     }
-                }
-            } else {
-                IItemHandler cap = level.getCapability(Capabilities.ItemHandler.BLOCK, getBlockPos(), blockState, (BlockEntity) (Object) this, Direction.WEST);
-                if (cap != null){
-                    if (cap instanceof IItemHandlerModifiable) {
-                        for (int i = 0; i < cap.getSlots(); i++) {
-                            if (ItemBlacklist.shouldDelete(cap.getStackInSlot(i))) {
-                                ((IItemHandlerModifiable) cap).setStackInSlot(i, ItemStack.EMPTY);
+                } else {
+                    IItemHandler cap = level.getCapability(Capabilities.ItemHandler.BLOCK, getBlockPos(), blockState, (BlockEntity) (Object) this, Direction.WEST);
+                    if (cap!=null) {
+                        if (cap instanceof IItemHandlerModifiable) {
+                            for (int i = 0; i < cap.getSlots(); i++) {
+                                if (ItemBlacklist.shouldDelete(cap.getStackInSlot(i))) {
+                                    ((IItemHandlerModifiable) cap).setStackInSlot(i, ItemStack.EMPTY);
+                                }
                             }
                         }
                     }

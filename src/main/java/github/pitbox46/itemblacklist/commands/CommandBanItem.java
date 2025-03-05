@@ -54,8 +54,8 @@ public class CommandBanItem {
 
         PlayerList playerList = context.getSource().getServer().getPlayerList();
         Utils.broadcastMessage(context.getSource().getServer(),
-                Component.literal("Item banned: ")
-                        .append(stack.getItem().toString()));
+                Component.literal("Item banned: ").append(stack.getItem().toString())
+        );
 
         for(ServerPlayer player : playerList.getPlayers()) {
             for(int i = 0; i < player.getInventory().getContainerSize(); i++) {

@@ -2,6 +2,7 @@ package github.pitbox46.itemblacklist.commands;
 
 
 import com.mojang.brigadier.CommandDispatcher;
+import github.pitbox46.itemblacklist.Config;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import github.pitbox46.itemblacklist.blacklist.Blacklist;
 import net.minecraft.commands.CommandBuildContext;
@@ -16,6 +17,7 @@ public class ModCommands {
                 .then(CommandUnbanItem.register(dispatcher, context))
                 .then(Commands
                         .literal("list")
+                        .requires(stack -> Config.SHOW_MESSAGES.getAsBoolean() || stack.hasPermission(1))
                         .executes(ctx -> {
                             ctx.getSource().getPlayerOrException().displayClientMessage(
                                     Component.literal("Items banned: ")
