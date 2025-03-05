@@ -32,7 +32,7 @@ import java.util.Collection;
 public class ItemBlacklist {
     public static final Logger LOGGER = LogManager.getLogger();
     public static File BLACKLIST_FILE = null;
-    public static Blacklist BLACKLIST = null;
+    public static Blacklist BLACKLIST = Blacklist.emptyBlacklist();
 
     public ItemBlacklist(ModContainer container) {
         NeoForge.EVENT_BUS.register(this);
