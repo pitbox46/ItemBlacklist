@@ -28,7 +28,7 @@ public abstract class ContainerMixin {
         }
     }
 
-    @Inject(at = @At(value = "HEAD"), method = "removed")
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;getCarried()Lnet/minecraft/world/item/ItemStack;"), method = "removed")
     public void onContainerClosed(Player playerIn, CallbackInfo ci) {
         for(int i = 0; i < this.slots.size(); ++i) {
             if(ItemBlacklist.shouldDelete(this.getItems().get(i), playerIn)) {

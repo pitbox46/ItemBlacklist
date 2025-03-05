@@ -9,9 +9,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -32,7 +34,7 @@ import java.util.Collection;
 public class ItemBlacklist {
     public static final Logger LOGGER = LogManager.getLogger();
     public static File BLACKLIST_FILE = null;
-    public static Blacklist BLACKLIST = null;
+    public static Blacklist BLACKLIST = Blacklist.emptyBlacklist();
 
     public ItemBlacklist(ModContainer container) {
         NeoForge.EVENT_BUS.register(this);
