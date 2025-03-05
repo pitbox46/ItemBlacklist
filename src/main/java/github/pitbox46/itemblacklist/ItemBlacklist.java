@@ -37,7 +37,7 @@ import java.util.*;
 public class ItemBlacklist {
     public static final Logger LOGGER = LogManager.getLogger();
     public static File BLACKLIST_FILE = null;
-    public static Blacklist BLACKLIST = null;
+    public static Blacklist BLACKLIST = Blacklist.emptyBlacklist();
     /**
      * Modified version of JsonOps that is null safe
      */
