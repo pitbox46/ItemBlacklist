@@ -79,19 +79,22 @@ public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (ItemBanPredicate) obj;
         return Objects.equals(this.itemPredicate, that.itemPredicate) &&
-                Objects.equals(this.groupKeys, that.groupKeys);
+                Objects.equals(this.groupKeys, that.groupKeys) &&
+                this.banNonPlayerItems == that.banNonPlayerItems;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(itemPredicate, groupKeys);
+        return Objects.hash(itemPredicate, groupKeys, banNonPlayerItems);
     }
 
     @Override
     public String toString() {
         return "ItemBanPredicate[" +
                 "itemPredicate=" + itemPredicate + ", " +
-                "groups=" + groupKeys + ']';
+                "groups=" + groupKeys +
+                "banNonPlayerItems=" + banNonPlayerItems +
+                ']';
     }
     //endregion
 }
