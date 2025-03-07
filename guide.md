@@ -76,6 +76,10 @@ trigger [item_durability_changed](https://minecraft.wiki/w/Advancement_definitio
 Note that this applies to 1.21 versions and up. `item_predicate` has slightly different syntax in 1.20.1, so
 you will have to do your own research.
 
+Also, there is an optional field `"ban_nonplayer"` which, if `false` means that items that are on the ground
+or in chests will not be banned. Items will only be banned if they have player interaction
+(ie. In a player's inventory, Picked up by a player, etc)
+
 ### `"groups": [...]`
 
 This section defines each group that we use in the item predicates. Each group
@@ -91,13 +95,15 @@ belongs to the group.
 - `usernames_blacklist`(List of strings): Never include these players
 - `teams`(List of strings): Include players on these teams
 - `teams_blacklist`(List of strings): Never include players on these teams
+- `game_types`(List of strings): A list of game modes that the bans apply to.
+For example, `"game_types": ["survival", "adventure"]`
 
 </details>
 
 The properties work as follows:  
 Players are kicked out if they belong to `usernames_blacklist`, `teams_blacklist`, 
-or their permission level isn't within the bounds. Otherwise, the player must match both of the
-`teams` and `usernames` categories. If any property is omitted, it is simply skipped. 
+or any other "blacklist". Otherwise, every other property must be true. 
+If any property is omitted, it is simply skipped. 
 This means if you wanted to give a specific player a ban, you can set the group up to be
 ```json
 "properties": {
