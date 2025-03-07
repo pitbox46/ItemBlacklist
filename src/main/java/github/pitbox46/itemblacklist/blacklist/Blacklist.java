@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group> groups) {
+public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, HashMap<String, Group> groups) {
     public static final Codec<Blacklist> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     ItemBanPredicate.CODEC.listOf()
@@ -28,18 +28,29 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
                     Group.CODEC.listOf()
                             .fieldOf("groups")
                             .orElse(new ArrayList<>())
-                            .xmap(ArrayList::new, ArrayList::new)
+                            .xmap(
+                                    l -> Util.make(
+                                            new HashMap<String, Group>(l.size()),
+                                            map -> l.forEach(group -> map.put(group.name(), group))
+                                    ),
+                                    map -> new ArrayList<>(map.values())
+                            )
                             .forGetter(Blacklist::groups)
             ).apply(instance, Blacklist::new)
     );
-
-    public static int MASTER_CALC_VER = 0;
 
     public boolean shouldBan(ItemStack stack, @Nullable Player player) {
         for (var pred : bannedItems) {
             if (pred.test(stack, player)) return true;
         }
         return false;
+    }
+
+    public boolean isPlayerInGroups(Collection<String> groupKeys, Player player) {
+        return groupKeys.stream().anyMatch(key -> {
+            Group group = groups.get(key);
+            return group != null && group.test(player);
+        });
     }
 
     /**
@@ -52,9 +63,9 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
     /**
      * Bans an item stack. Uses the component patch if it exists
      * @param stack The itemstack
-     * @param group The group
+     * @param groupKey The group
      */
-    public void addItem(ItemStack stack, String group) {
+    public void addItem(ItemStack stack, String groupKey) {
         if (stack.isEmpty()) {
             return;
         }
@@ -67,12 +78,14 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
                 .build();
         var matchingPred = bannedItems.stream().filter(pred -> itemPredicate.equals(pred.itemPredicate())).findAny();
         if (matchingPred.isPresent()) {
-            matchingPred.get().groups().add(group);
-            matchingPred.get().mapGroups(groups);
+            matchingPred.get().groupKeys().add(groupKey);
         } else {
-            ItemBanPredicate pred = new ItemBanPredicate(itemPredicate, Util.make(new ArrayList<>(), l -> l.add(group)));
+            ItemBanPredicate pred = new ItemBanPredicate(
+                    itemPredicate,
+                    Util.make(new ArrayList<>(), l -> l.add(groupKey)),
+                    true
+            );
             bannedItems.add(pred);
-            pred.mapGroups(groups);
         }
     }
 
@@ -85,10 +98,17 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
         return bannedItems.removeIf(pred -> pred.itemPredicate().test(stack));
     }
 
+    public void recalculate() {
+        bannedItems.forEach(ItemBanPredicate::recalculate);
+    }
+
     public static Blacklist emptyBlacklist() {
         return new Blacklist(
                 new ArrayList<>(),
-                Util.make(new ArrayList<>(), l -> l.add(new Group("default", Group.Properties.EMPTY)))
+                Util.make(
+                        new HashMap<>(),
+                        map -> map.put("default", new Group("default", Group.Properties.EMPTY))
+                )
         );
     }
 
@@ -102,7 +122,6 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, ArrayList<Group
         Blacklist blacklist = CODEC.parse(levelRegistryAccess.createSerializationContext(JsonOps.INSTANCE), json)
                 .resultOrPartial(m -> ItemBlacklist.LOGGER.warn("Could not read blacklist: {}", m))
                 .orElseGet(Blacklist::emptyBlacklist);
-        blacklist.bannedItems().forEach(pred -> pred.mapGroups(blacklist.groups()));
         return blacklist;
     }
     //endregion

@@ -4,7 +4,6 @@ package github.pitbox46.itemblacklist.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import github.pitbox46.itemblacklist.Config;
 import github.pitbox46.itemblacklist.ItemBlacklist;
-import github.pitbox46.itemblacklist.blacklist.Blacklist;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -29,7 +28,7 @@ public class ModCommands {
                         .literal("recalculate")
                         .requires(cs -> cs.hasPermission(2))
                         .executes(ctx -> {
-                            Blacklist.MASTER_CALC_VER++;
+                            ItemBlacklist.BLACKLIST.recalculate();
                             return 0;
                         }))
         );
