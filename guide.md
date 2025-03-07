@@ -131,7 +131,7 @@ Furthermore, the following will only include `mike192` if they are not a server 
 
 If we wanted to have a `mike192` and `red_team` rather than `mike192` only when
 they're in the `red_team`, then we simply make two separate teams and list both
-of them in the `"items": {"groups": ["a", "b,], ...}`.
+of them in the `"items": {"groups": ["a", "b"], ...}`.
 
 ## Commands
 
