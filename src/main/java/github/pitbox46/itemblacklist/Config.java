@@ -12,10 +12,10 @@ public class Config {
             .defineInRange("banRate", 1.0, 0.0, 1.0);
     public static BooleanValue BAN_CONTAINER = b
             .comment("Should ban items from containers")
-            .define("banContainerChanged", true);;
+            .define("banContainerChanged", true);
     public static BooleanValue BAN_MERCHANT_TRADES = b
             .comment("Should take away merchant trades")
-            .define("banMerchantTrades", true);;
+            .define("banMerchantTrades", true);
     public static BooleanValue BAN_CRAFTING = b
             .comment("Should ban crafting recipes that create the item")
             .define("banCraftingRecipes", true);
