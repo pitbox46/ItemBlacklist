@@ -37,8 +37,6 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, HashMap<String,
             ).apply(instance, Blacklist::new)
     );
 
-    public static int MASTER_CALC_VER = 0;
-
     public boolean shouldBan(ItemStack stack, @Nullable Player player) {
         for (var pred : bannedItems) {
             if (pred.test(stack, player)) return true;
