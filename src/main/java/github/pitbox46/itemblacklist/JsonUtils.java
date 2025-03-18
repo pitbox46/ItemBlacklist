@@ -51,10 +51,8 @@ public class JsonUtils {
     }
 
     public static void writeJson(File jsonFile, Blacklist blacklist, RegistryAccess registryAccess) {
-        try (Reader reader = new FileReader(jsonFile)) {
-            try (FileWriter fileWriter = new FileWriter(jsonFile)) {
-                fileWriter.write(GSON.toJson(blacklist.encodeToJSON(registryAccess)));
-            }
+        try (FileWriter fileWriter = new FileWriter(jsonFile)) {
+            fileWriter.write(GSON.toJson(blacklist.encodeToJSON(registryAccess)));
         } catch (IOException e) {
             LOGGER.error(e);
         }

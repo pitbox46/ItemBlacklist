@@ -3,8 +3,10 @@ package github.pitbox46.itemblacklist.blacklist;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import github.pitbox46.itemblacklist.mixins.EntityAccessor;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,9 +31,11 @@ public record Group(String name, Properties properties) implements Predicate<Pla
             Optional<HashSet<String>> usernames,
             Optional<HashSet<String>> usernamesBlacklisted,
             Optional<HashSet<String>> teams,
-            Optional<HashSet<String>> teamsBlacklisted
+            Optional<HashSet<String>> teamsBlacklisted,
+            Optional<HashSet<GameType>> gameTypes
     ) implements Predicate<Player> {
         public static Properties EMPTY = new Properties(
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -53,7 +57,10 @@ public record Group(String name, Properties properties) implements Predicate<Pla
                                 .forGetter(Properties::teams),
                         Codec.STRING.listOf().optionalFieldOf("teams_blacklist")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
-                                .forGetter(Properties::teamsBlacklisted)
+                                .forGetter(Properties::teamsBlacklisted),
+                        GameType.CODEC.listOf().optionalFieldOf("game_types")
+                                .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
+                                .forGetter(Properties::gameTypes)
                 ).apply(instance, Properties::new)
         );
 
@@ -80,6 +87,11 @@ public record Group(String name, Properties properties) implements Predicate<Pla
                 return false;
             }
             if (opLevelMax.map(i -> opLevel > i).orElse(false)) {
+                return false;
+            }
+
+            if (player instanceof ServerPlayer serverPlayer &&
+                    gameTypes.map(types -> !types.contains(serverPlayer.gameMode.getGameModeForPlayer())).orElse(false)) {
                 return false;
             }
 

@@ -12,6 +12,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -35,6 +36,7 @@ public class ItemBlacklist {
     public static Blacklist BLACKLIST = Blacklist.emptyBlacklist();
 
     public ItemBlacklist(ModContainer container) {
+        container.registerConfig(ModConfig.Type.SERVER, Config.SERVER, "itemblacklist.properties.toml");
         NeoForge.EVENT_BUS.register(this);
     }
 
@@ -57,26 +59,32 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onEntityJoinWorld(EntityJoinLevelEvent event) {
-        if(event.getEntity() instanceof ItemEntity) {
-            if(shouldDelete(((ItemEntity) event.getEntity()).getItem())) {
-                event.setCanceled(true);
+        if (Config.BAN_ITEM_ENTITY.getAsBoolean() && Config.testBanRate()) {
+            if (event.getEntity() instanceof ItemEntity) {
+                if (shouldDelete(((ItemEntity) event.getEntity()).getItem())) {
+                    event.setCanceled(true);
+                }
             }
         }
     }
 
     @SubscribeEvent
     public void onItemPickup(ItemEntityPickupEvent.Pre event) {
-        if(shouldDelete(event.getItemEntity().getItem(), event.getPlayer())) {
-            event.getItemEntity().remove(Entity.RemovalReason.KILLED);
-            event.setCanPickup(TriState.FALSE);
+        if (Config.BAN_ITEM_ENTITY.getAsBoolean() && Config.testBanRate()) {
+            if (shouldDelete(event.getItemEntity().getItem(), event.getPlayer())) {
+                event.getItemEntity().remove(Entity.RemovalReason.KILLED);
+                event.setCanPickup(TriState.FALSE);
+            }
         }
     }
 
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
-        for(int i = 0; i < event.getContainer().slots.size(); ++i) {
-            if(shouldDelete(event.getContainer().getSlot(i).getItem(), event.getEntity())) {
-                event.getContainer().getSlot(i).set(ItemStack.EMPTY);
+        if (Config.BAN_CONTAINER.getAsBoolean() && Config.testBanRate()) {
+            for (int i = 0; i < event.getContainer().slots.size(); ++i) {
+                if (shouldDelete(event.getContainer().getSlot(i).getItem(), event.getEntity())) {
+                    event.getContainer().getSlot(i).set(ItemStack.EMPTY);
+                }
             }
         }
     }
