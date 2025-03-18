@@ -51,9 +51,9 @@ public class ItemBlacklist {
         }
     };
 
-    public ItemBlacklist() {
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-        MinecraftForge.EVENT_BUS.register(this);
+    public ItemBlacklist(ModContainer container) {
+        container.registerConfig(ModConfig.Type.SERVER, Config.SERVER, "itemblacklist.properties.toml");
+        NeoForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
@@ -79,26 +79,32 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onEntityJoinWorld(EntityJoinLevelEvent event) {
-        if(event.getEntity() instanceof ItemEntity itemEntity) {
-            if(shouldDelete(itemEntity.getItem())) {
-                event.setCanceled(true);
+        if (Config.BAN_ITEM_ENTITY.getAsBoolean() && Config.testBanRate()) {
+            if (event.getEntity() instanceof ItemEntity) {
+                if (shouldDelete(((ItemEntity) event.getEntity()).getItem())) {
+                    event.setCanceled(true);
+                }
             }
         }
     }
 
     @SubscribeEvent
-    public void onItemPickup(EntityItemPickupEvent event) {
-        if(shouldDelete(event.getItem().getItem(), event.getEntity())) {
-            event.setCanceled(true);
-            event.getItem().remove(Entity.RemovalReason.KILLED);
+    public void onItemPickup(ItemEntityPickupEvent.Pre event) {
+        if (Config.BAN_ITEM_ENTITY.getAsBoolean() && Config.testBanRate()) {
+            if (shouldDelete(event.getItemEntity().getItem(), event.getPlayer())) {
+                event.getItemEntity().remove(Entity.RemovalReason.KILLED);
+                event.setCanPickup(TriState.FALSE);
+            }
         }
     }
 
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
-        for(int i = 0; i < event.getContainer().slots.size(); ++i) {
-            if(shouldDelete(event.getContainer().getSlot(i).getItem(), event.getEntity())) {
-                event.getContainer().getSlot(i).set(ItemStack.EMPTY);
+        if (Config.BAN_CONTAINER.getAsBoolean() && Config.testBanRate()) {
+            for (int i = 0; i < event.getContainer().slots.size(); ++i) {
+                if (shouldDelete(event.getContainer().getSlot(i).getItem(), event.getEntity())) {
+                    event.getContainer().getSlot(i).set(ItemStack.EMPTY);
+                }
             }
         }
     }
@@ -109,8 +115,8 @@ public class ItemBlacklist {
 
     public static boolean shouldDelete(ItemStack stack, @Nullable Player player) {
         BanItemEvent event = new BanItemEvent(stack);
-        MinecraftForge.EVENT_BUS.post(event);
-        if(event.getResult() == Event.Result.DENY) {
+        NeoForge.EVENT_BUS.post(event);
+        if(event.deleteItem) {
             return true;
         }
         else {
@@ -122,7 +128,7 @@ public class ItemBlacklist {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for(ItemBanPredicate pred: itemList) {
-            builder.append(pred.itemPredicate().items).append(", ");
+            builder.append(pred.itemPredicate().items().orElse(HolderSet.empty())).append(", ");
         }
         if(!itemList.isEmpty()) {
             builder.delete(builder.length() - 2, builder.length());

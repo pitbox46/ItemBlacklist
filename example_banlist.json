@@ -1,0 +1,38 @@
+{
+	"bannedItems": [
+		{
+			"id": "minecraft:stick",
+			"groups": ["mike", "sam"]
+		}
+	],
+	"bannedItemStacks": [
+		{
+			"id": "minecraft:potion",
+			"groups": ["notAdmin"],
+			"components": [
+				{
+				}
+			]
+		}
+	],
+	"groups": [
+		{
+			"name": "notAdmin",
+			"isNot": {
+				"opAtLeast": 1
+			}
+		},
+		{
+			"name": "mike",
+			"is": {
+				"username": "mike102"
+			}
+		},
+		{
+			"name": "sam",
+			"is": {
+				"username": "sam21"
+			}
+		}
+	]
+}

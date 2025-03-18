@@ -36,13 +36,15 @@ public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
     private int calcVer = 0;
     private final ItemPredicate itemPredicate;
     private final ArrayList<String> groupKeys;
+    private final boolean banNonPlayerItems;
 
     private final List<Group> groups = new ArrayList<>();
     private final Object2BooleanMap<Player> cachedPlayers = new Object2BooleanOpenHashMap<>();
 
-    public ItemBanPredicate(ItemPredicate itemPredicate, ArrayList<String> groupKeys) {
+    public ItemBanPredicate(ItemPredicate itemPredicate, ArrayList<String> groupKeys, boolean banNonPlayerItems) {
         this.itemPredicate = itemPredicate;
         this.groupKeys = groupKeys;
+        this.banNonPlayerItems = banNonPlayerItems;
     }
 
     /**
@@ -59,22 +61,20 @@ public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
     @Override
     public boolean test(ItemStack stack, @Nullable Player player) {
         if (player == null) {
-            return itemPredicate.matches(stack);
-        }
-
-        //Reset the cache if the master version tells us to
-        if (Blacklist.MASTER_CALC_VER > calcVer) {
-            cachedPlayers.clear();
-            calcVer = Blacklist.MASTER_CALC_VER;
+            return banNonPlayerItems && itemPredicate.test(stack);
         }
 
         if (cachedPlayers.computeIfAbsent(
                 player,
-                (Predicate<? super Player>) p -> groups.stream().anyMatch(group -> group.test(player))
+                (Predicate<? super Player>) p -> ItemBlacklist.BLACKLIST.isPlayerInGroups(groupKeys, p)
         )) {
-            return itemPredicate().matches(stack);
+            return itemPredicate().test(stack);
         }
         return false;
+    }
+
+    public void recalculate() {
+        cachedPlayers.clear();
     }
 
     //region Record Boilerplate
@@ -82,8 +82,12 @@ public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
         return itemPredicate;
     }
 
-    public ArrayList<String> groups() {
+    public ArrayList<String> groupKeys() {
         return groupKeys;
+    }
+
+    public boolean banNonPlayerItems() {
+        return banNonPlayerItems;
     }
 
     @Override
@@ -92,19 +96,22 @@ public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (ItemBanPredicate) obj;
         return Objects.equals(this.itemPredicate, that.itemPredicate) &&
-                Objects.equals(this.groupKeys, that.groupKeys);
+                Objects.equals(this.groupKeys, that.groupKeys) &&
+                this.banNonPlayerItems == that.banNonPlayerItems;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(itemPredicate, groupKeys);
+        return Objects.hash(itemPredicate, groupKeys, banNonPlayerItems);
     }
 
     @Override
     public String toString() {
         return "ItemBanPredicate[" +
                 "itemPredicate=" + itemPredicate + ", " +
-                "groups=" + groupKeys + ']';
+                "groups=" + groupKeys +
+                "banNonPlayerItems=" + banNonPlayerItems +
+                ']';
     }
     //endregion
 }

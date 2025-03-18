@@ -65,7 +65,7 @@ public class CommandBanItem {
             }
         }
 
-        Blacklist.MASTER_CALC_VER++;
+        ItemBlacklist.BLACKLIST.recalculate();
         return 0;
     }
 }
