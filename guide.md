@@ -146,8 +146,10 @@ ban [item] [group](optional)
 #Sensitive to data components (such as enchantments)
 
 ban hand [group](optional)
+ban hand [include_tag](boolean) [group](optional)
 #Makes an entry for the item in your main hand and lists it. 
-#Sensitive to data components (such as enchantments)
+#Sensitive to data components if include_tag (such as enchantments)
+#include_tag defaults to false
 
 unban [item]
 #Removes every entry that tests true for the itemstack

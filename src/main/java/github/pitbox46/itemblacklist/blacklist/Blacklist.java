@@ -55,7 +55,7 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, HashMap<String,
      * Bans an item stack. We use the default group
      */
     public void addItem(ItemStack stack) {
-        addItem(stack, "default");
+        addItem(stack, false, "default");
     }
 
 
@@ -64,15 +64,16 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, HashMap<String,
      * @param stack The itemstack
      * @param groupKey The group
      */
-    public void addItem(ItemStack stack, String groupKey) {
+    public void addItem(ItemStack stack, boolean includeTag, String groupKey) {
         if (stack.isEmpty()) {
             return;
         }
-        ItemPredicate itemPredicate = ItemPredicate.Builder
-                .item()
-                .of(stack.getItem())
-                .hasNbt(stack.getTag())
-                .build();
+        ItemPredicate.Builder builder = ItemPredicate.Builder.item().of(stack.getItem());
+        if (includeTag) {
+            builder.hasNbt(stack.getOrCreateTag());
+        }
+        ItemPredicate itemPredicate = builder.build();
+
         var matchingPred = bannedItems.stream().filter(pred -> itemPredicate.equals(pred.itemPredicate())).findAny();
         if (matchingPred.isPresent()) {
             matchingPred.get().groupKeys().add(groupKey);

@@ -1,12 +1,12 @@
 package github.pitbox46.itemblacklist.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import github.pitbox46.itemblacklist.Utils;
-import github.pitbox46.itemblacklist.blacklist.Blacklist;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -25,32 +25,49 @@ public class CommandBanItem {
                         .executes(ctx -> banItem(
                                 ctx,
                                 ItemArgument.getItem(ctx, "item").createItemStack(1, false),
+                                true,
                                 "default")
                         )
                         .then(Commands.argument("group", StringArgumentType.word())
                                 .executes(ctx -> banItem(
                                         ctx,
                                         ItemArgument.getItem(ctx, "item").createItemStack(1, false),
-                                        StringArgumentType.getString(ctx, "group")))
+                                        true,
+                                        StringArgumentType.getString(ctx, "group"))
+                                )
                         )
                 )
                 .then(Commands.literal("hand")
                         .executes(ctx -> {
                             ItemStack stack = ctx.getSource().getPlayerOrException().getMainHandItem();
-                            return banItem(ctx, stack, "default");
-                        }).then(Commands.argument("group", StringArgumentType.word())
-                                .executes(ctx -> banItem(
-                                        ctx,
-                                        ctx.getSource().getPlayerOrException().getMainHandItem(),
-                                        StringArgumentType.getString(ctx, "group")))
+                            return banItem(ctx, stack, false, "default");
+                        })
+                        .then(Commands.argument("include_tag", BoolArgumentType.bool())
+                                .executes(ctx -> {
+                                    ItemStack stack = ctx.getSource().getPlayerOrException().getMainHandItem();
+                                    return banItem(
+                                            ctx,
+                                            stack,
+                                            BoolArgumentType.getBool(ctx, "include_tag"),
+                                            "default"
+                                    );
+                                })
+                                .then(Commands.argument("group", StringArgumentType.word())
+                                        .executes(ctx -> banItem(
+                                                ctx,
+                                                ctx.getSource().getPlayerOrException().getMainHandItem(),
+                                                BoolArgumentType.getBool(ctx, "include_tag"),
+                                                StringArgumentType.getString(ctx, "group"))
+                                        )
+                                )
                         )
                 );
     }
 
-    private static int banItem(CommandContext<CommandSourceStack> context, ItemStack stack, String group) {
+    private static int banItem(CommandContext<CommandSourceStack> context, ItemStack stack, boolean includeTag, String group) {
         if(stack.isEmpty())
             return 1;
-        ItemBlacklist.BLACKLIST.addItem(stack.copy(), group);
+        ItemBlacklist.BLACKLIST.addItem(stack.copy(), includeTag, group);
 
         PlayerList playerList = context.getSource().getServer().getPlayerList();
         Utils.broadcastMessage(context.getSource().getServer(),
