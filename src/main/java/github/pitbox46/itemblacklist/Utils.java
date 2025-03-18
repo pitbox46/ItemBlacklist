@@ -8,7 +8,7 @@ public class Utils {
     public static void broadcastMessage(MinecraftServer server, Component component) {
         server.sendSystemMessage(component);
         for (ServerPlayer serverplayer : server.getPlayerList().getPlayers()) {
-            if (Config.SHOW_MESSAGES.getAsBoolean() || serverplayer.hasPermissions(1)) {
+            if (Config.SHOW_MESSAGES.get() || serverplayer.hasPermissions(1)) {
                 serverplayer.sendSystemMessage(component, false);
             }
         }

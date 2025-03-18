@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import github.pitbox46.itemblacklist.mixins.EntityAccessor;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 
@@ -46,10 +45,10 @@ public record Group(String name, Properties properties) implements Predicate<Pla
                 instance.group(
                         Codec.INT.optionalFieldOf("op_level_min").forGetter(Properties::opLevelMin),
                         Codec.INT.optionalFieldOf("op_level_max").forGetter(Properties::opLevelMax),
-                        ExtraCodecs.PLAYER_NAME.listOf().optionalFieldOf("usernames")
+                        Codec.STRING.listOf().optionalFieldOf("usernames")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
                                 .forGetter(Properties::usernames),
-                        ExtraCodecs.PLAYER_NAME.listOf().optionalFieldOf("usernames_blacklist")
+                        Codec.STRING.listOf().optionalFieldOf("usernames_blacklist")
                                 .xmap(o -> o.map(HashSet::new), o -> o.map(ArrayList::new))
                                 .forGetter(Properties::usernamesBlacklisted),
                         Codec.STRING.listOf().optionalFieldOf("teams")

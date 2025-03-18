@@ -5,11 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "itemblacklist.refmap.json",
   "mixins": [
-    "BlockEntityMixin",
     "ContainerMixin",
-    "EntityMixin",
+    "EntityAccessor",
     "MerchantMenuMixin",
-    "RecipeManagerMixin"
+    "RecipeManagerMixin",
+    "TileEntityMixin"
   ],
   "client": [
   ],

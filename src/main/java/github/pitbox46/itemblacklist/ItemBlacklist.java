@@ -9,6 +9,7 @@ import github.pitbox46.itemblacklist.commands.ModCommands;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
@@ -19,12 +20,11 @@ import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,8 +52,8 @@ public class ItemBlacklist {
     };
 
     public ItemBlacklist(ModContainer container) {
-        container.registerConfig(ModConfig.Type.SERVER, Config.SERVER, "itemblacklist.properties.toml");
-        NeoForge.EVENT_BUS.register(this);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER, "itemblacklist.properties.toml");
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
@@ -79,7 +79,7 @@ public class ItemBlacklist {
 
     @SubscribeEvent
     public void onEntityJoinWorld(EntityJoinLevelEvent event) {
-        if (Config.BAN_ITEM_ENTITY.getAsBoolean() && Config.testBanRate()) {
+        if (Config.BAN_ITEM_ENTITY.get() && Config.testBanRate()) {
             if (event.getEntity() instanceof ItemEntity) {
                 if (shouldDelete(((ItemEntity) event.getEntity()).getItem())) {
                     event.setCanceled(true);
@@ -89,18 +89,18 @@ public class ItemBlacklist {
     }
 
     @SubscribeEvent
-    public void onItemPickup(ItemEntityPickupEvent.Pre event) {
-        if (Config.BAN_ITEM_ENTITY.getAsBoolean() && Config.testBanRate()) {
-            if (shouldDelete(event.getItemEntity().getItem(), event.getPlayer())) {
-                event.getItemEntity().remove(Entity.RemovalReason.KILLED);
-                event.setCanPickup(TriState.FALSE);
+    public void onItemPickup(EntityItemPickupEvent event) {
+        if (Config.BAN_ITEM_ENTITY.get() && Config.testBanRate()) {
+            if (shouldDelete(event.getItem().getItem(), event.getEntity())) {
+                event.setCanceled(true);
+                event.getItem().remove(Entity.RemovalReason.KILLED);
             }
         }
     }
 
     @SubscribeEvent
     public void onPlayerContainerOpen(PlayerContainerEvent event) {
-        if (Config.BAN_CONTAINER.getAsBoolean() && Config.testBanRate()) {
+        if (Config.BAN_CONTAINER.get() && Config.testBanRate()) {
             for (int i = 0; i < event.getContainer().slots.size(); ++i) {
                 if (shouldDelete(event.getContainer().getSlot(i).getItem(), event.getEntity())) {
                     event.getContainer().getSlot(i).set(ItemStack.EMPTY);
@@ -114,21 +114,17 @@ public class ItemBlacklist {
     }
 
     public static boolean shouldDelete(ItemStack stack, @Nullable Player player) {
-        BanItemEvent event = new BanItemEvent(stack);
-        NeoForge.EVENT_BUS.post(event);
-        if(event.deleteItem) {
-            return true;
-        }
-        else {
-            return BLACKLIST.shouldBan(stack, player);
-        }
+        return BLACKLIST.shouldBan(stack, player);
     }
 
     public static String itemListToString(Collection<ItemBanPredicate> itemList) {
         StringBuilder builder = new StringBuilder();
         builder.append('[');
         for(ItemBanPredicate pred: itemList) {
-            builder.append(pred.itemPredicate().items().orElse(HolderSet.empty())).append(", ");
+            Set<Item> items = pred.itemPredicate().items;
+            if (items != null) {
+                builder.append(items).append(", ");
+            }
         }
         if(!itemList.isEmpty()) {
             builder.delete(builder.length() - 2, builder.length());

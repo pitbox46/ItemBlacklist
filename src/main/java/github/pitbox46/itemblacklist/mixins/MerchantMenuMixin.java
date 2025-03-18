@@ -14,7 +14,7 @@ public abstract class MerchantMenuMixin {
     @Inject(at = @At(value = "RETURN"), method = "getOffers", cancellable = true)
     private void getOffers(CallbackInfoReturnable<MerchantOffers> cir) {
         if (cir.getReturnValue() != null) {
-            if (Config.BAN_MERCHANT_TRADES.getAsBoolean()) {
+            if (Config.BAN_MERCHANT_TRADES.get()) {
                 MerchantOffers returnedOffers = new MerchantOffers();
                 cir.getReturnValue().forEach(offer -> {
                     if (!ItemBlacklist.shouldDelete(offer.assemble()))

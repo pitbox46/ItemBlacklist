@@ -22,7 +22,7 @@ public abstract class ContainerMixin {
 
     @Inject(at = @At(value = "HEAD"), method = "broadcastChanges")
     public void onDetectAndSendChanges(CallbackInfo ci) {
-        if (Config.BAN_CONTAINER.getAsBoolean() && Config.testBanRate()) {
+        if (Config.BAN_CONTAINER.get() && Config.testBanRate()) {
             for (int i = 0; i < this.slots.size(); ++i) {
                 if (ItemBlacklist.shouldDelete(this.getItems().get(i))) {
                     this.getItems().set(i, ItemStack.EMPTY);
@@ -33,7 +33,7 @@ public abstract class ContainerMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;getCarried()Lnet/minecraft/world/item/ItemStack;"), method = "removed")
     public void onContainerClosed(Player playerIn, CallbackInfo ci) {
-        if (Config.BAN_CONTAINER.getAsBoolean() && Config.testBanRate()) {
+        if (Config.BAN_CONTAINER.get() && Config.testBanRate()) {
             for (int i = 0; i < this.slots.size(); ++i) {
                 if (ItemBlacklist.shouldDelete(this.getItems().get(i), playerIn)) {
                     this.getItems().set(i, ItemStack.EMPTY);

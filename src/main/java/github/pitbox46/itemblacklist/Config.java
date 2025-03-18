@@ -1,7 +1,7 @@
 package github.pitbox46.itemblacklist;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.neoforge.common.ModConfigSpec.*;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec.*;
 
 public class Config {
     private static final Builder b = new Builder();
@@ -27,7 +27,7 @@ public class Config {
             .comment("Should non-ops be able to see the banned items")
             .define("showMessages", true);
 
-    public static final ModConfigSpec SERVER = b.pop().build();
+    public static final ForgeConfigSpec SERVER = b.pop().build();
 
     public static boolean testBanRate() {
         if (BAN_RATE.get() >= 1.0) {
