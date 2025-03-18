@@ -51,7 +51,7 @@ public class ItemBlacklist {
         }
     };
 
-    public ItemBlacklist(ModContainer container) {
+    public ItemBlacklist() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER, "itemblacklist.properties.toml");
         MinecraftForge.EVENT_BUS.register(this);
     }
