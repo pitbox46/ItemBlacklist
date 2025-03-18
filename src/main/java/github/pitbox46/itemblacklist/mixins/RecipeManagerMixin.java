@@ -4,6 +4,7 @@ import github.pitbox46.itemblacklist.Config;
 import github.pitbox46.itemblacklist.ItemBlacklist;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -28,10 +29,12 @@ public class RecipeManagerMixin {
 
     @Inject(at = @At(value = "RETURN"), method = "getRecipesFor", cancellable = true)
     private <I extends RecipeInput, T extends Recipe<I>> void onGetRecipes(RecipeType<T> pRecipeType, I pInput, Level pLevel, CallbackInfoReturnable<List<RecipeHolder<T>>> cir) {
-        cir.setReturnValue(cir.getReturnValue()
-                .stream()
-                .filter(entry -> !ItemBlacklist.shouldDelete(entry.value().assemble(pInput, pLevel.registryAccess())))
-                .toList()
-        );
+        if (Config.BAN_CRAFTING.getAsBoolean()) {
+            cir.setReturnValue(cir.getReturnValue()
+                    .stream()
+                    .filter(entry -> !ItemBlacklist.shouldDelete(entry.value().assemble(pInput, pLevel.registryAccess())))
+                    .toList()
+            );
+        }
     }
 }
