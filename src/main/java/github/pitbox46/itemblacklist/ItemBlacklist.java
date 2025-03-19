@@ -89,11 +89,11 @@ public class ItemBlacklist {
         }
     }
 
-    public static boolean shouldDelete(ItemStack stack) {
+    public static boolean shouldDelete(@Nullable ItemStack stack) {
         return shouldDelete(stack, null);
     }
 
-    public static boolean shouldDelete(ItemStack stack, @Nullable Player player) {
+    public static boolean shouldDelete(@Nullable ItemStack stack, @Nullable Player player) {
         BanItemEvent event = new BanItemEvent(stack);
         NeoForge.EVENT_BUS.post(event);
         if(event.deleteItem) {

@@ -9,6 +9,7 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -42,7 +43,7 @@ public final class ItemBanPredicate implements BiPredicate<ItemStack, Player> {
     }
 
     @Override
-    public boolean test(ItemStack stack, @Nullable Player player) {
+    public boolean test(@Nonnull ItemStack stack, @Nullable Player player) {
         if (player == null) {
             return banNonPlayerItems && itemPredicate.test(stack);
         }
