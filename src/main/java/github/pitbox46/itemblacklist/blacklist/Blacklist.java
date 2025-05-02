@@ -67,6 +67,7 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, HashMap<String,
     /**
      * Bans an item stack. Uses the component patch if it exists
      * @param stack The itemstack
+     * @param includeTag If true and the stack has an NBT, then the predicate will have an NBT
      * @param groupKey The group
      */
     public void addItem(ItemStack stack, boolean includeTag, String groupKey) {
@@ -74,8 +75,8 @@ public record Blacklist(ArrayList<ItemBanPredicate> bannedItems, HashMap<String,
             return;
         }
         ItemPredicate.Builder builder = ItemPredicate.Builder.item().of(stack.getItem());
-        if (includeTag) {
-            builder.hasNbt(stack.getOrCreateTag());
+        if (includeTag && stack.hasTag()) {
+            builder.hasNbt(stack.getTag());
         }
         ItemPredicate itemPredicate = builder.build();
 

@@ -1,1 +1,1 @@
-- Fix NPE with checking null itemstacks
+- Don't set NBT if the itemstack doesn't have one (issue #22)
